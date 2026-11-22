@@ -153,7 +153,7 @@ td{border-top:1px solid var(--line)}tr:nth-child(even) td{background:#FAFBFC}
 <div>
   <div class="panel" style="padding:14px 16px">
     <h2 id="title" style="font-size:18px;margin-bottom:2px">단일 DPS 순위</h2><div class="tag" style="margin:0 0 2px">줄 클릭 = 덱 앞 칸부터 넣기 · 덱에 있는 도술(흐린 줄)은 다시 클릭하면 빠짐</div><div class="sub" id="cond"></div>
-    <div class="sxp" id="modeBox"><b>대상</b> <label class="opt"><input type="radio" name="dmode" value="boss"> 보스</label> <label class="opt"><input type="radio" name="dmode" value="solo"> 개인</label>
+    <div class="sxp" id="modeBox"><b>대상</b> <label class="opt"><input type="radio" name="dmode" value="fb"> 필드보스</label> <label class="opt"><input type="radio" name="dmode" value="raid"> 레이드</label> <label class="opt"><input type="radio" name="dmode" value="solo"> 개인</label>
       <span class="tag" style="margin-left:4px" id="modeTip"></span><input type="checkbox" id="oRaid" style="display:none"><input type="checkbox" id="oBoss" style="display:none"><div id="sxRes" style="display:none"></div></div>
     <div class="tblw"><table><thead><tr><th>순위</th><th>도술</th><th>대상</th><th>1회 피해(공격력%)</th><th>한 바퀴</th><th title="1회 피해 ÷ 손이 묶이는 시간(모션+차지)">점유 1초당</th><th>초당 DPS</th></tr></thead><tbody id="rows"></tbody></table></div>
     <div class="foot">· <b>점유 1초당</b> = 1회 피해 ÷ 손이 묶이는 시간(모션 + 차지). 차지 1.5초 동안은 다른 도술·평타를 못 쓰니, 쿨이 꽉 찬 덱에서 무엇을 먼저 넣을지는 이 값으로 비교하세요. 차지 손해까지 정확히 보려면 아래 덱 시뮬레이션(5분)이 정답 — 시뮬은 차지·모션 동안 다음 도술이 밀리는 걸 그대로 계산해요.<br>
@@ -483,9 +483,9 @@ function drawPal(){const inD=new Set(cfg.deck.filter(x=>x!=null));let h='';
  S.forEach((s,si)=>{const ks=D.skills.filter(k=>k.st===si);
   h+=`<div class="prow"><span class="chip" style="background:${COL[si]}">${s}</span>`+ks.map(k=>`<span class="card ${k.u?'ult':''} ${inD.has(k.id)?'in':''}" draggable="true" data-card="${k.id}" style="border-color:${COL[si]}">${icon(k)}${(cfg.bt[k.id]||0)?'★ ':''}${k.n}${k.u?' (궁)':''}</span>`).join('')+'</div>';});
  $('pal').innerHTML=h;}
-function sxOn(s,op){return op.includes(s)&&(cfg.sx[s]!=null?cfg.sx[s]:SX[s][1]);}
+function sxOn(s,op){return op.includes(s)&&SX[s][1];}   // 11/23 사용자: 신식 개방 체크 없앰 → 열리면 자동
 function drawSx(){const op=opened();
- $('sxBox').innerHTML=op.length?`<div class="sub">신식 개방: <b>${op.join(', ')}</b> — 상시 적용할 효과 (체크 해제 = 안 넣음)</div><div class="sx">`+op.map(s=>`<label><input type="checkbox" data-sx="${s}" ${sxOn(s,op)?'checked':''}><span class="chip" style="background:${COL[S.indexOf(s)]}">${s}</span> ${SX[s][0]}</label>`).join('')+'</div>'
+ $('sxBox').innerHTML=op.length?`<div class="sub">신식 개방: <b>${op.join(', ')}</b> — 덱 조건이 맞아 자동 적용</div><div class="sx">`+op.map(s=>`<span style="margin-right:12px"><span class="chip" style="background:${COL[S.indexOf(s)]}">${s}</span> ${SX[s][0]}${SX[s][1]?'':' <span class="tag">(쿨 있는 효과라 상시 적용 안 함)</span>'}</span>`).join('')+'</div>'
   :`<div class="warn">신식 미개방 — 궁극기를 고르고, 그 궁극기 스타일 도술을 3개 이상 넣으면 열려요</div>`;}
 function deckChanged(){save();drawSlots();drawUlt();drawPal();drawSx();simDeck();_calc();}
 // 덱에 넣기: 일반 도술 = 앞 빈 칸부터, 궁극기 = 있던 궁 자리 바꾸기(없으면 앞 빈 칸)
@@ -715,10 +715,18 @@ document.querySelector('.sxp').addEventListener('change',e=>{const s=e.target.da
 $('oBoss').checked=cfg.boss!==false; $('oBoss').onchange=e=>{cfg.boss=e.target.checked; fakeWin.__BOSS=cfg.boss; save(); calc();};
 // 11/23 사용자: 신식 개방 칸 → 보스/개인. 보스 = 디버프·표식·상태이상 전부 걸린 상태, 개인 = 내 덱이 거는 것만 연계 계산
 cfg.sxs=[];
-function drawMode(){document.querySelectorAll('input[name=dmode]').forEach(r=>r.checked=(r.value==='boss')===!!cfg.raid);
- $('modeTip').textContent=cfg.raid?'보스 = 파티가 디버프·표식·상태이상(파열·파쇄·관통·원소·정밀·출혈·속박 …)을 전부 걸어 둔 상태로 보고 모든 도술의 「○○ 대상 적중 시」 효과를 켬':'개인 = 내 덱 도술이 거는 디버프·표식만. 순위표는 연계 효과 끔(회색 표시), 덱 시뮬은 내 덱에 거는 도술이 있으면 걸린 시간만큼 켬';}
-$('modeBox').addEventListener('change',e=>{if(e.target.name!=='dmode')return;cfg.raid=e.target.value==='boss';fakeWin.__RAID=cfg.raid;save();calc();});
-drawMode();
+// 11/23 사용자: 필드보스 = 모든 디버프·표식·상태이상이 이미 걸린 상태(내 디버프 도술은 걸 필요 없음 → 디버프 값은 빼고 연계 효과는 전부 켬)
+//               레이드·개인 = 내 덱 도술이 거는 디버프만 계산 · 보스 대상(연타 격노 보스 +20% 등) = 필드보스·레이드 켬, 개인 끔
+const DMODE={fb:{raid:true,nodeb:true,boss:true},raid:{raid:false,nodeb:false,boss:true},solo:{raid:false,nodeb:false,boss:false}};
+if(!DMODE[cfg.dmode]) cfg.dmode=cfg.raid?'fb':'raid';
+function applyMode(){const m=DMODE[cfg.dmode];cfg.raid=m.raid;cfg.nodeb=m.nodeb;cfg.boss=m.boss;fakeWin.__RAID=m.raid;fakeWin.__BOSS=m.boss;
+ if($('oNoDeb'))$('oNoDeb').checked=m.nodeb;}
+function drawMode(){document.querySelectorAll('input[name=dmode]').forEach(r=>r.checked=r.value===cfg.dmode);
+ $('modeTip').textContent={fb:'필드보스 = 다른 사람들이 디버프·표식·상태이상을 전부 걸어 둔 상태. 내 디버프 도술의 디버프 값은 빼고(이미 걸려 있음), 「○○ 대상 적중 시」 연계 효과는 모든 도술에 켬',
+  raid:'레이드 = 보스 대상. 디버프·표식은 내 덱 도술이 거는 것만 (순위표는 그 도술 자기 피해에, 덱 시뮬은 걸린 시간만큼)',
+  solo:'개인 = 일반 사냥. 디버프·표식은 내 덱 도술이 거는 것만, 보스 전용 효과(연타 격노 보스 피해 등) 끔'}[cfg.dmode];}
+$('modeBox').addEventListener('change',e=>{if(e.target.name!=='dmode')return;cfg.dmode=e.target.value;applyMode();save();calc();});
+applyMode();drawMode();
 const _calc=calc;calc=function(){_calc();drawOff();drawSx1();drawSlots();drawUlt();drawPal();drawSx();simDeck();};
 drawSlots();drawUlt();drawPal();drawSx();simDeck();drawSx1();drawOff();
 </script></body></html>
