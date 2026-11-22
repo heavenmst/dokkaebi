@@ -118,7 +118,7 @@ details.how{margin-top:6px}
     <div class="row"><label>내 방어력</label><input id="def" type="number" step="100" placeholder="예: 12000"></div>
   </div>
   <div class="panel">
-    <h2>내 사냥터 <small style="font-weight:400;color:var(--dim);font-size:12px">오른쪽 「💾 저장」으로 쌓임 · 「📂 내 사냥터」로 비교표에 불러오기</small></h2>
+    <h2>내 사냥터 <small style="font-weight:400;color:var(--dim);font-size:12px">기록 비교 A·B 옆 「💾 저장」 → 여기 쌓이고 「지금 사냥」에 들어감 · 카드 누르면 다시 넣기</small></h2>
     <div id="myspots"></div>
   </div>
 </div>
@@ -126,7 +126,7 @@ details.how{margin-top:6px}
   <div class="panel">
     <h2>내 기록 비교 — 분당 · 시간당 획득량</h2>
     <div id="recs"></div>
-    <div style="margin:6px 0 10px"><button id="addrec">+ 기록 추가</button> <button id="saverec" title="지금 비교표의 기록(사냥터·분당 처치)과 내 공격력·방어력을 왼쪽 「내 사냥터」에 저장">💾 저장</button> <button id="loadrec" title="왼쪽 「내 사냥터」에 저장한 기록을 비교표로 불러오기">📂 내 사냥터</button></div>
+    <div style="margin:6px 0 10px"><button id="addrec">+ 기록 추가</button> <button id="loadrec" title="왼쪽 「내 사냥터」에 저장한 기록을 비교표로 불러오기">📂 내 사냥터</button></div>
     <div id="cmpwarn"></div><div class="tbl" style="max-height:none"><table id="cmp"></table></div>
     <details class="how"><summary>계산 방식 · 설명 보기</summary><ul><li><b>전래동화는 판이 둘</b>이에요. <b>[주간 비경]</b> = 주 5시간(수요일 05:00 충전) 동안의 드랍표, <b>[상시 비경]</b> = 그 5시간을 다 쓴 뒤의 드랍표. 이름은 같아도 재료 양이 크게 달라요(원님 고개 재료: 주간이 상시의 약 27배). 주간 원님 고개 숫자는 게임 데이터 + 실제 47,000마리 기록으로 확인.</li><li>기록마다 사냥터와 실제 분당 처치를 넣으면 게임 데이터 드랍률로 분당·시간당 평균 획득량을 계산해요.</li><li>첫 번째 기록 대비 차이를 %로 보여줘요(초록 = 더 많음).</li><li>도술 요령서 = 12종(절명~제압) 합계, 원하는 1종은 이 값 ÷ 12. 단이 담긴 상자 = 열면 정기단 1~10개 무작위지만 실제 확률은 1개 21%·2개 50%·3개 25%·5개 3%·10개 1% (게임 데이터) → 1개 = 정기단 평균 2.21개로 환산. 단 합계 = 정기단 + 영기단×4 + 천지단×16 + 조화단×64 + 상자 환산. 강화 비법서 합계 = 장비 강화 <b>비법서</b>(책)를 전설 1장 기준으로 환산: 전설 + 영웅÷10 + 희귀÷100 + 일반÷1000 — 철·옷감·피혁 같은 강화 재료가 아니에요.</li><li>강화 재료는 사냥에서 희귀(철광석·옷감·피혁)·영웅(철 주괴·고급 옷감·강화 피혁)만 나오고 전설 재료(연마된 철 주괴 등)는 드랍이 없어요.</li><li>영기 수련 가속 = 1분·5분·10분권 드랍률 × 분을 모두 더한 값. 장비 아이템 = 청동 운검·흑암 단도·승려의 지팡이·바람물결 은선·물소뿔 흑각궁·군관의 전립·군관의 구군복·영기 흡수의 단화·청동 다리보호구·영기 흡수의 장갑·영혼술사의 홍색 각대 드랍 확률 합, 1개 = 요혼석 2개로 환산. 요혼석 시세를 넣으면 가치 합계에 들어가요.</li><li>만귀령패는 쉬움·보통·어려움이 서로 다른 아이템이라 따로 표시.</li></ul></details>
   </div>
@@ -255,10 +255,11 @@ function renderRecs(){
   const pr=n=>PR[n]?' · '+(PR[n][0]===PR[n][1]?man(PR[n][0]):man(PR[n][0])+'~'+man(PR[n][1])):'';
   const nopts=NM.map(n=>`<option value="${n}">${n}${pr(n)}</option>`).join('')+'<optgroup label="── 전래동화 주간 비경 (주 5시간) ──">'+DN.filter(n=>WKN.has(n)).map(n=>`<option value="${n}">${n}${pr(n)}</option>`).join('')+'</optgroup><optgroup label="── 비경 · 상시 비경 ──">'+DN.filter(n=>!WKN.has(n)).map(n=>`<option value="${n}">${n}${pr(n)}${ALN.has(n)?' — 주간 5시간 소진 후':''}</option>`).join('')+'</optgroup>';
   const lopts=n=>Z.map((z,i)=>z.z===n?`<option value="${i}">${z.lv||'전체'} · ${man(z.pw)}</option>`:'').join('');
-  $('recs').innerHTML=RECS.map((r,j)=>`<div class="row" style="grid-template-columns:24px 1fr 150px 90px 64px 36px"><b style="color:var(--gold)">${String.fromCharCode(65+j)}</b><select data-j="${j}" class="rzn">${nopts}</select><select data-j="${j}" class="rz">${lopts((Z[r.z]||Z[0]).z)}</select><input type="number" min="1" data-j="${j}" class="rk" value="${r.k}"><span style="color:var(--sub)">마리/분</span>${RECS.length>1?`<button data-j="${j}" class="rx" title="삭제">×</button>`:''}</div>`).join('');
+  $('recs').innerHTML=RECS.map((r,j)=>`<div class="row" style="grid-template-columns:24px 1fr 150px 90px 64px 64px 36px"><b style="color:var(--gold)">${String.fromCharCode(65+j)}</b><select data-j="${j}" class="rzn">${nopts}</select><select data-j="${j}" class="rz">${lopts((Z[r.z]||Z[0]).z)}</select><input type="number" min="1" data-j="${j}" class="rk" value="${r.k}"><span style="color:var(--sub)">마리/분</span><button data-j="${j}" class="rs" title="이 기록을 왼쪽 「지금 사냥」으로 보내고 내 사냥터에 저장">💾 저장</button>${RECS.length>1?`<button data-j="${j}" class="rx" title="삭제">×</button>`:''}</div>`).join('');
   $('recs').querySelectorAll('.rzn').forEach(e=>{e.value=(Z[RECS[e.dataset.j].z]||Z[0]).z;e.onchange=()=>{const o=Z[RECS[e.dataset.j].z]||{};let i=Z.findIndex(z=>z.z===e.value&&z.lv===o.lv);if(i<0)i=Z.findIndex(z=>z.z===e.value);RECS[e.dataset.j].z=i;renderRecs()}});
   $('recs').querySelectorAll('.rz').forEach(e=>{e.value=RECS[e.dataset.j].z;e.onchange=()=>{RECS[e.dataset.j].z=+e.value;renderRecs()}});
   $('recs').querySelectorAll('.rk').forEach(e=>e.oninput=()=>{RECS[e.dataset.j].k=+e.value||0;sv('recs',RECS);renderCmp()});guardSel($('recs'));
+  $('recs').querySelectorAll('.rs').forEach(e=>e.onclick=()=>saveRec(+e.dataset.j,e));
   $('recs').querySelectorAll('.rx').forEach(e=>e.onclick=()=>{RECS.splice(+e.dataset.j,1);renderRecs()});
   renderCmp();
 }
@@ -297,13 +298,20 @@ function renderAll(){
 // 11/23 사용자: 저장 = 비교표 기록을 왼쪽 「내 사냥터」에 쌓기(같은 사냥터·구역은 새 값으로) · 내 사냥터 = 그 목록을 비교표로
 let MY=ld('myspots',[]);
 const zIdx=k=>Z.findIndex(z=>key(z)===k);
+const manG=v=>(Math.round(v/1000)/10)+'만';
+const MY_IT=[['엽전','엽전',0],['요혼석','요혼석',1],['정기단','정기단',1],['조화단','조화단',3],['가속분','영기 수련(분)',0],['전설재료','전설 재료',2]];
 function renderMy(){sv('myspots',MY);
-  $('myspots').innerHTML=MY.length?MY.map((m,i)=>`<div class="myit" style="display:flex;align-items:center;gap:8px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;margin:4px 0;background:#FAFBFC"><span style="flex:1">${icoTag('엽전')}<b>${m.key}</b><small style="display:block;color:var(--sub)">분당 ${m.k}마리${m.atk?' · 공 '+fmt(+m.atk):''}${m.def?' · 방 '+fmt(+m.def):''} · ${m.at}</small></span><button data-myx="${i}" title="지우기" style="padding:2px 8px">✕</button></div>`).join('')
-   :'<div style="color:var(--dim);font-size:13px">아직 없음 — 오른쪽 비교표에서 기록을 만들고 「💾 저장」을 누르세요</div>';}
-$('myspots').onclick=e=>{const b=e.target.closest('[data-myx]');if(!b)return;MY.splice(+b.dataset.myx,1);renderMy()};
-$('saverec').onclick=()=>{const d=new Date(),at=`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-  RECS.forEach(r=>{const z=Z[r.z];if(!z)return;const e={key:key(z),k:r.k,atk:$('atk').value,def:$('def').value,at};const o=MY.findIndex(m=>m.key===e.key);if(o>=0)MY[o]=e;else MY.push(e)});
-  renderMy();const b=$('saverec');b.textContent='✔ 저장됨';setTimeout(()=>b.textContent='💾 저장',1200)};
+  $('myspots').innerHTML=MY.length?MY.map((m,i)=>{const zi=zIdx(m.key),z=Z[zi];const pw=z?z.pw:m.pw;
+    const its=z?MY_IT.map(([k,n,d])=>{const v=amt(z,k)*m.k*60;return v>0?`<span style="display:inline-block;margin:2px 10px 0 0">${icoTag(k)}${n} <b>${fq(v,d)}</b></span>`:''}).join(''):'<small>사냥터 정보 없음</small>';
+    return `<div class="myit" data-myi="${i}" title="누르면 「지금 사냥」에 넣기" style="cursor:pointer;padding:7px 9px;border:1px solid var(--line);border-radius:8px;margin:5px 0;background:#FAFBFC">
+    <div style="display:flex;align-items:center;gap:8px"><b style="flex:1">${m.key} <span style="color:#B7791F">· 전투력 ${pw?manG(pw):'—'}</span> <span style="font-weight:400;color:var(--sub)">· 분당 ${m.k}마리</span></b><button data-myx="${i}" title="지우기" style="padding:2px 8px">✕</button></div>
+    <div style="font-size:12.5px;color:var(--tx)">시간당 ${its}</div><small style="color:var(--dim)">${m.at}${m.atk?' · 공 '+fmt(+m.atk):''}${m.def?' · 방 '+fmt(+m.def):''}</small></div>`}).join('')
+   :'<div style="color:var(--dim);font-size:13px">아직 없음 — 오른쪽 기록 비교에서 A·B 옆 「💾 저장」을 누르세요</div>';}
+function toCur(zi,k){if(zi<0)return;$('cur').value=zi;$('kpm').value=k;$('cur').dispatchEvent(new Event('change'));}
+function saveRec(j,btn){const r=RECS[j],z=Z[r.z];if(!z)return;const d=new Date(),at=`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  const e={key:key(z),pw:z.pw,k:r.k,atk:$('atk').value,def:$('def').value,at};const o=MY.findIndex(m=>m.key===e.key);if(o>=0)MY[o]=e;else MY.unshift(e);
+  renderMy();toCur(r.z,r.k);if(btn){btn.textContent='✔';setTimeout(()=>btn.textContent='💾 저장',1000)}}
+$('myspots').onclick=e=>{const b=e.target.closest('[data-myx]');if(b){MY.splice(+b.dataset.myx,1);renderMy();return}const c=e.target.closest('[data-myi]');if(c){const m=MY[+c.dataset.myi];toCur(zIdx(m.key),m.k)}};
 $('loadrec').onclick=()=>{const L=MY.map(m=>({z:zIdx(m.key),k:m.k})).filter(r=>r.z>=0);if(!L.length)return;RECS=L;
   const last=MY[MY.length-1];if(last.atk)$('atk').value=last.atk;if(last.def)$('def').value=last.def;renderRecs();render()};
 renderMy();
