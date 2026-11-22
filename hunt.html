@@ -114,8 +114,8 @@ details.how{margin-top:6px}
     <div class="row" style="grid-template-columns:1fr"><label>사냥터</label><select id="cur" style="width:100%"></select></div>
     <div class="row big"><label>분당 처치</label><input id="kpm" type="number" min="1" step="1" value="90"></div>
     <div class="row" style="display:none"><label>이득 기준</label><select id="basis"></select></div>
-    <div class="row"><label>내 공격력</label><input id="atk" type="number" step="100" placeholder="예: 40800"></div>
-    <div class="row"><label>내 방어력</label><input id="def" type="number" step="100" placeholder="예: 12000"></div>
+    <div class="row"><label>내 공격력 <small>K 단위 · 4만 = 40</small></label><input id="atk" type="number" step="0.1" placeholder="예: 40.8"></div>
+    <div class="row"><label>내 방어력 <small>K 단위</small></label><input id="def" type="number" step="0.1" placeholder="예: 12"></div>
     <div class="row"><label>내 전투력 <small>K 단위 · 50만 = 500</small></label><input id="mypw" type="number" step="1" placeholder="예: 520"></div>
     <div class="kpi" id="kpi" style="margin-top:8px"></div>
     <h3 style="margin:12px 0 2px;font-size:14px">저장한 사냥터 <small style="font-weight:400;color:var(--dim);font-size:12px">기록 비교 A·B 옆 「💾 저장」 → 여기 쌓이고 위 기준에 들어감 · 카드 누르면 다시 기준으로</small></h3>
@@ -174,8 +174,8 @@ const val=z=>amt(z,$('basis').value);
 const zn=[...new Set(Z.filter(z=>!z.dun).map(z=>z.z))].filter(n=>M[n]);
 zn.forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;$('msel').appendChild(o)});
 {const og=document.createElement('optgroup');og.label='── 비경 · 전래동화 ──';DUNN.filter(n=>M[n]).forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;og.appendChild(o)});$('msel').appendChild(og)}
-$('cur').value=ld('cur',Z.findIndex(z=>z.z==='역병의 부화장'));$('kpm').value=ld('kpm',90);$('atk').value=ld('atk','');
-$('def').value=ld('def','');{const a=+ld('mypw','')||0,b=+ld('pwr',100);$('mypw').value=a?(a>=10000?a/1000:a):'';$('pwr').value=b>=10000?b/1000:b;}
+$('cur').value=ld('cur',Z.findIndex(z=>z.z==='역병의 부화장'));$('kpm').value=ld('kpm',90);const K_=v=>{v=+v||0;return v?(v>=1000?v/1000:v):''};$('atk').value=K_(ld('atk',''));
+$('def').value=K_(ld('def',''));{const a=+ld('mypw','')||0,b=+ld('pwr',100);$('mypw').value=a?(a>=10000?a/1000:a):'';$('pwr').value=b>=10000?b/1000:b;}
 function fmt(n,d=0){return n.toLocaleString('ko-KR',{maximumFractionDigits:d,minimumFractionDigits:d})}
 // 드랍 감소 (깨비지지 drop-penalty 11/06 방식)
 const DT=DP.table,RU=DP.rule;
@@ -307,13 +307,13 @@ function renderMy(){sv('myspots',MY);
     const its=z?MY_IT.map(([k,n,d])=>{const v=amt(z,k)*m.k*60;return v>0?`<span style="display:inline-block;margin:2px 10px 0 0">${icoTag(k)}${n} <b>${fq(v,d)}</b></span>`:''}).join(''):'<small>사냥터 정보 없음</small>';
     return `<div class="myit" data-myi="${i}" title="누르면 「지금 사냥」에 넣기" style="cursor:pointer;padding:7px 9px;border:1px solid var(--line);border-radius:8px;margin:5px 0;background:#FAFBFC">
     <div style="display:flex;align-items:center;gap:8px"><b style="flex:1">${m.key} <span style="color:#B7791F">· 몬스터 ${pw?manG(pw):'—'}</span> <span style="font-weight:400;color:var(--sub)">· 분당 ${m.k}마리</span></b><button data-myx="${i}" title="지우기" style="padding:2px 8px">✕</button></div>
-    <div style="font-size:12.5px;margin:2px 0"><b>공</b> ${m.atk?fmt(+m.atk):'—'} · <b>방</b> ${m.def?fmt(+m.def):'—'} · <b>전투력</b> ${m.mp?fmt(+m.mp>=10000?+m.mp:+m.mp*1000):'—'}</div><div style="font-size:12.5px;color:var(--tx)">시간당 ${its}</div><small style="color:var(--dim)">${m.at}</small></div>`}).join('')
+    <div style="font-size:12.5px;margin:2px 0"><b>공</b> ${m.atk?fmt(+m.atk>=1000?+m.atk/1000:+m.atk,1)+'K':'—'} · <b>방</b> ${m.def?fmt(+m.def>=1000?+m.def/1000:+m.def,1)+'K':'—'} · <b>전투력</b> ${m.mp?fmt(+m.mp>=10000?+m.mp/1000:+m.mp)+'K':'—'}</div><div style="font-size:12.5px;color:var(--tx)">시간당 ${its}</div><small style="color:var(--dim)">${m.at}</small></div>`}).join('')
    :'<div style="color:var(--dim);font-size:13px">아직 없음 — 오른쪽 기록 비교에서 A·B 옆 「💾 저장」을 누르세요</div>';}
 function toCur(zi,k){if(zi<0)return;$('cur').value=zi;$('kpm').value=k;$('cur').dispatchEvent(new Event('change'));}
 function saveRec(j,btn){const r=RECS[j],z=Z[r.z];if(!z)return;const d=new Date(),at=`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
   const e={key:key(z),pw:z.pw,k:r.k,atk:$('atk').value,def:$('def').value,mp:$('mypw').value,at};const o=MY.findIndex(m=>m.key===e.key);if(o>=0)MY[o]=e;else MY.unshift(e);
   renderMy();toCur(r.z,r.k);if(btn){btn.textContent='✔';setTimeout(()=>btn.textContent='💾 저장',1000)}}
-$('myspots').onclick=e=>{const b=e.target.closest('[data-myx]');if(b){MY.splice(+b.dataset.myx,1);renderMy();return}const c=e.target.closest('[data-myi]');if(c){const m=MY[+c.dataset.myi];if(m.atk)$('atk').value=m.atk;if(m.def)$('def').value=m.def;if(m.mp)$('mypw').value=+m.mp>=10000?+m.mp/1000:m.mp;toCur(zIdx(m.key),m.k)}};
+$('myspots').onclick=e=>{const b=e.target.closest('[data-myx]');if(b){MY.splice(+b.dataset.myx,1);renderMy();return}const c=e.target.closest('[data-myi]');if(c){const m=MY[+c.dataset.myi];if(m.atk)$('atk').value=K_(m.atk);if(m.def)$('def').value=K_(m.def);if(m.mp)$('mypw').value=+m.mp>=10000?+m.mp/1000:m.mp;toCur(zIdx(m.key),m.k)}};
 $('loadrec').onclick=()=>{const L=MY.map(m=>({z:zIdx(m.key),k:m.k})).filter(r=>r.z>=0);if(!L.length)return;RECS=L;
   const last=MY[MY.length-1];if(last.atk)$('atk').value=last.atk;if(last.def)$('def').value=last.def;renderRecs();render()};
 renderMy();
@@ -443,7 +443,7 @@ function renderMon(){
     return `<div class="sec" ${AR[s]?`id="sec-${AR[s].l}" style="border-left:4px solid ${AR[s].c}"`:''}><h3>${AR[s]?`<b class="ab" style="background:${AR[s].c}">${AR[s].l}</b>`:''}${s}${secPw(n,s)?`<span class="pwc">전투력 ${secPw(n,s)}</span>`:''}<span class="n">${sum}마리 · ${(P[s]||[]).length}묶음</span></h3>${mixbar(t)}${packs||L.map(([m,a,c])=>`<div class="mon"><i class="at a-${a}">${a}</i>${m.replace(n+' ','')}<span class="c">${c}</span></div>`).join('')}</div>`}).join('');
 }
 drawNeedIts();
-addEventListener('storage',e=>{if(e.key==='hc_atk'){try{const v=JSON.parse(e.newValue||'""');if(v!==$('atk').value){$('atk').value=v;render()}}catch(x){}}});   // 11/23 DPS 계산기 공격력과 연동
+addEventListener('storage',e=>{if(e.key==='hc_atk'){try{const v=K_(JSON.parse(e.newValue||'""'));if(String(v)!==$('atk').value){$('atk').value=v;render()}}catch(x){}}});   // 11/23 DPS 계산기 공격력과 연동
 ['cur','kpm','atk','def','basis','mypw','pwr'].forEach(id=>{$(id).oninput=render;$(id).onchange=render});
 $('cur').addEventListener('change',()=>{const z=Z[+$('cur').value],k=z.mk||z.z;if(M[k]){sv('sgl_'+k,-1);$('msel').value=k;renderMon()}});
 $('msel').onchange=()=>{SEL=null;renderMon()};
