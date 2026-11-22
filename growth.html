@@ -13,7 +13,10 @@ main{max-width:1280px;margin:0 auto;padding:20px 16px}
 h1{font-size:26px;letter-spacing:-.3px;margin:0 0 4px}
 h2{font-size:17px;margin:0 0 12px;color:var(--text);display:flex;align-items:center;gap:6px}
 .sub{color:var(--sub);font-size:13px;margin-bottom:16px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:16px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}.grid>.card{margin-bottom:0}
+#goalCard{grid-column:span 2}
+@media (max-width:980px){.grid{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}#goalCard{grid-column:auto}}
+#out{margin-top:16px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 1px 2px rgba(0,0,0,.04);padding:18px 20px;margin-bottom:16px}
 label{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:7px 0;color:var(--text);font-size:14px}
 label>span{flex:1;display:flex;align-items:center;gap:6px;min-width:110px}
@@ -89,13 +92,12 @@ img.ic{width:22px;height:22px;vertical-align:middle;object-fit:contain;flex:none
   <div class="note">각 비경 하루 기본 1시간 무료 · 티켓 1장=1시간, 모든 비경 합쳐 하루 최대 6장. 비경 시간만큼 사냥터 시간이 줄어듭니다.</div>
   <div style="margin-top:6px">배분 방식 <span class="seg"><button id="modeOpt">최적 배분</button><button id="modeSimple">하루 한 비경만</button></span></div>
  </div>
-</div>
-
-<div class="card">
+ <div class="card" id="goalCard">
  <h2>목표 (최대 10개)</h2>
  <div id="goals"></div>
  <button id="addGoal">+ 목표 추가</button> <button id="resetAll">기본값으로</button>
  <div class="note" style="margin-top:6px">장비는 전설 등급, 도술 돌파는 전설(특별) 등급만 다룹니다. 도술 강화는 스타일별 단계(모든 스타일 비용 같음).</div>
+ </div>
 </div>
 
 <div id="out"></div>
@@ -112,18 +114,14 @@ const fmt = (x,d=0) => (x==null||!isFinite(x)) ? '-' : Number(x).toLocaleString(
 const man = x => !isFinite(x)?'-':(x===0?'0':fmt(x/1e4,Math.abs(x)>=1e5?1:2)+'만');   // 11/23 사용자: 엽전은 만 단위
 const P = n => D.places.find(p=>p.name===n);
 const DEF = {
- huntPlace:'[상시 비경] 고독한 귀족 지구', huntLv:'85', huntKpm:4, huntHours:23, extraCoin:1000000, extraYh:100, extraSkb:30,
- haveCoin:1000000, haveYh:200, haveBook:700, haveSkb:0, haveCheon:0,
- mangLv:'99', mangKpm:70, oldLv:'99', oldKpm:70, tickets:'19', mode:'opt',
- goals:[
-  {type:'equip',part:'Accessory',cur:19,to:50,trCur:0,trTo:1},
-  {type:'equip',part:'Accessory',cur:28,to:50,trCur:0,trTo:1},
-  {type:'equip',part:'Armor',cur:39,to:50,trCur:0,trTo:1},
-  {type:'equip',part:'Armor',cur:29,to:50,trCur:0,trTo:1}]
+ huntPlace:'[상시 비경] 고독한 귀족 지구', huntLv:'85', huntKpm:4, huntHours:23, extraCoin:0, extraYh:0, extraSkb:0,   // 11/23 사용자: 처음 들어오는 사람은 0, 이후엔 마지막 입력 기억
+ haveCoin:0, haveYh:0, haveBook:0, haveSkb:0, haveCheon:0,
+ mangLv:'99', mangKpm:70, oldLv:'99', oldKpm:70, tickets:'0', mode:'opt',
+ goals:[{type:'equip',part:'Weapon',cur:0,to:0,trCur:0,trTo:0}]
 };
 let S;
 function load(){ let s=null; try{ s=JSON.parse(localStorage.getItem('growth_plan_v1')||'null'); }catch(e){}
- S = Object.assign(JSON.parse(JSON.stringify(DEF)), s||{}); if(S.haveSkb==null) S.haveSkb=0; if(S.extraSkb==null) S.extraSkb=30;
+ S = Object.assign(JSON.parse(JSON.stringify(DEF)), s||{}); if(S.haveSkb==null) S.haveSkb=0; if(S.extraSkb==null) S.extraSkb=0;
  const q=new URLSearchParams(location.search);   // 시험용: ?mode=simple&tickets=30&reset=1
  if(q.get('reset')) S=JSON.parse(JSON.stringify(DEF));
  if(q.get('goals')){ try{ S.goals=JSON.parse(q.get('goals')); }catch(e){} }
