@@ -14,11 +14,11 @@ nav a{display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:10p
 nav a:hover{background:var(--bg);color:var(--tx)}
 nav a.on{background:var(--accbg);color:var(--acc);border-color:#C9D7FF}
 nav svg{width:18px;height:18px}
-.note{margin-left:auto;color:var(--sub);font-size:12px}
+.note{margin-left:auto;color:var(--sub);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 12px;justify-content:flex-end;max-width:640px}.note b{color:var(--tx)}
 main{flex:1;position:relative}
 iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:none;background:var(--bg)}
 iframe.on{display:block}
-@media(max-width:700px){.note{display:none}nav a{padding:7px 10px;font-size:14px}.bar{gap:10px}}
+@media(max-width:700px){.note{margin-left:0;justify-content:flex-start;font-size:11px}nav a{padding:7px 10px;font-size:14px}.bar{gap:10px}}
 </style></head><body>
 <header><div class="bar">
  <div class="logo">도깨비</div>
@@ -26,15 +26,15 @@ iframe.on{display:block}
   <a href="#hunt" data-t="hunt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 20l6-12 4 7 3-4 5 9z"/><circle cx="17" cy="5" r="2"/></svg>사냥터 효율</a>
   <a href="#dps" data-t="dps"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.5 3.5l6 6L10 20l-6 0 0-6z"/><path d="M12 6l6 6"/></svg>도술 DPS</a>
   <a href="#growth" data-t="growth"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>성장 목표</a>
-  <a href="#salvage" data-t="salvage"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></svg>분해 계산</a>
+  <a href="#salvage" data-t="salvage"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></svg>금전시세 / 분해 계산</a>
  </nav>
- <div class="note">게임 클라이언트 표 기준 · 입력값은 내 브라우저에만 저장</div>
+ <div class="note" id="info"></div>
 </div></header>
 <main>
  <iframe id="f-hunt" data-src="hunt.html" title="사냥터 효율 계산기"></iframe>
  <iframe id="f-dps" data-src="dps.html" title="도술 DPS 계산기"></iframe>
  <iframe id="f-growth" data-src="growth.html" title="성장 목표 계산기"></iframe>
- <iframe id="f-salvage" data-src="salvage.html" title="분해 계산기"></iframe>
+ <iframe id="f-salvage" data-src="salvage.html" title="금전시세 / 분해 계산"></iframe>
 </main>
 <script>
 const TABS=['hunt','dps','growth','salvage'];
@@ -44,8 +44,10 @@ function show(){
   if(on&&!f.src) f.src=f.dataset.src;   // 처음 누를 때만 불러오고 이후엔 입력 상태 유지
   f.classList.toggle('on',on);
   document.querySelector(`nav a[data-t="${k}"]`).classList.toggle('on',on);});
- document.title={hunt:'사냥터 효율',dps:'도술 DPS',growth:'성장 목표',salvage:'분해 계산'}[t]+' · 도깨비';
+ document.title={hunt:'사냥터 효율',dps:'도술 DPS',growth:'성장 목표',salvage:'금전시세 / 분해 계산'}[t]+' · 도깨비';
 }
+const INFO={"client": "도깨비의 세계 PC 클라이언트 (Unity 6000.3)", "client_patch": "2026-11-18 대격변 패치", "client_note": "드랍표·도술 수치·지도 = 이 패치 클라이언트에서 직접 추출", "ver": "1.23", "updated": "2026-11-23 08:26"};
+document.getElementById('info').innerHTML=`<span>마지막 업데이트 <b>${INFO.updated}</b></span><span>버전 <b>v${INFO.ver}</b></span><span title="${INFO.client_note}">클라이언트 <b>${INFO.client}</b></span><span>클라이언트 업데이트 <b>${INFO.client_patch}</b></span>`;
 addEventListener('hashchange',show); show();
 </script>
 </body></html>

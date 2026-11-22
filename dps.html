@@ -132,8 +132,6 @@ td{border-top:1px solid var(--line)}tr:nth-child(even) td{background:#FAFBFC}
     <label class="opt"><input type="checkbox" id="oWDeb">내 디버프 덱 전체 적용 <span class="tag" style="margin:0">받는 피해·받는 치명 피해 증가</span></label>
     <div class="sub" style="margin:0 0 4px 26px">체크 = 덱 도술이 거는 효과를 덱 전체 피해에 넣음. 계속 걸려 있지 않으면 지금 덱을 1시간 돌려 본 가동률만큼만 (순위표 = 평균, 덱 시뮬 = 시간대별 그대로). 해제 = 건 도술 자기 피해에만.</div>
     <div id="wSum" class="sub" style="margin:0 0 6px 26px"></div>
-    <label class="opt"><input type="checkbox" id="oRaid">레이드 <span class="tag" style="margin:0">표식·상태이상 전부 걸려 있다고 봄</span></label>
-    <div class="sub" style="margin:0 0 6px 26px">「○○ 대상 적중 시」 같은 연계 효과(파열·파쇄·관통·원소·정밀·출혈·속박 …). 체크 = 다른 사람이 다 걸어 준다고 보고 모든 도술에 켬. 해제 = 순위표에선 끔, 덱 시뮬에선 내 덱에 그 표식을 거는 도술이 있을 때만(걸린 시간만큼).</div>
     <details style="margin:0 0 6px 0"><summary class="sub" style="cursor:pointer">세부 — 효과 하나씩 빼기 · 레이드용 깡딜</summary>
     <label class="opt"><input type="checkbox" id="oNoDeb">적 디버프 빼기 <span class="tag" style="margin:0" title="방어력 감소·받는 피해 증가·받는 치명 피해를 계산에서 뺌 — 레이드는 남이 걸어주니 깡딜로 비교. 내 버프(공격력·주는 피해 증가)는 그대로">레이드용 깡딜</span></label>
     <div id="offs" style="margin:2px 0 6px 0"></div></details>
@@ -155,8 +153,8 @@ td{border-top:1px solid var(--line)}tr:nth-child(even) td{background:#FAFBFC}
 <div>
   <div class="panel" style="padding:14px 16px">
     <h2 id="title" style="font-size:18px;margin-bottom:2px">단일 DPS 순위</h2><div class="tag" style="margin:0 0 2px">줄 클릭 = 덱 앞 칸부터 넣기 · 덱에 있는 도술(흐린 줄)은 다시 클릭하면 빠짐</div><div class="sub" id="cond"></div>
-    <div class="sxp"><b>신식 개방</b> <label class="opt"><input type="checkbox" data-sxc="연타"> 연타</label> <label class="opt"><input type="checkbox" data-sxc="강타"> 강타</label> <label class="opt"><input type="checkbox" data-sxc="파멸"> 파멸</label> <label class="opt"><input type="checkbox" data-sxc="기만"> 기만</label> <label class="opt" title="연타 격노: 11-18 패치로 '보스에게 주는 피해 0.4%/중첩(최대 20%)'이 추가됨. 켜면 연타 신식 = +40%, 끄면 +20%" style="margin-left:10px"><input type="checkbox" id="oBoss"> 보스 대상</label>
-      <span class="tag" style="margin-left:4px">하나만 선택 · 다시 누르면 끔 · 체크 = 아래 순위 DPS와 1회 피해에 신식 효과 1시간 평균 적용 (연타 상시 +20%, 보스 대상이면 +40% · 파멸 켜진 비율·발동 때 쿨 초기화 · 강타 영력 평균·강압 · 기만 평균 쿨 0.75배)</span><div id="sxRes" class="sub" style="margin:2px 0 0"></div></div>
+    <div class="sxp" id="modeBox"><b>대상</b> <label class="opt"><input type="radio" name="dmode" value="boss"> 보스</label> <label class="opt"><input type="radio" name="dmode" value="solo"> 개인</label>
+      <span class="tag" style="margin-left:4px" id="modeTip"></span><input type="checkbox" id="oRaid" style="display:none"><input type="checkbox" id="oBoss" style="display:none"><div id="sxRes" style="display:none"></div></div>
     <div class="tblw"><table><thead><tr><th>순위</th><th>도술</th><th>대상</th><th>1회 피해(공격력%)</th><th>한 바퀴</th><th title="1회 피해 ÷ 손이 묶이는 시간(모션+차지)">점유 1초당</th><th>초당 DPS</th></tr></thead><tbody id="rows"></tbody></table></div>
     <div class="foot">· <b>점유 1초당</b> = 1회 피해 ÷ 손이 묶이는 시간(모션 + 차지). 차지 1.5초 동안은 다른 도술·평타를 못 쓰니, 쿨이 꽉 찬 덱에서 무엇을 먼저 넣을지는 이 값으로 비교하세요. 차지 손해까지 정확히 보려면 아래 덱 시뮬레이션(5분)이 정답 — 시뮬은 차지·모션 동안 다음 도술이 밀리는 걸 그대로 계산해요.<br>
     · 대상 수 2명 이상: 범위기만 순위에 나오고, 맞는 수 = 대상 수와 최대 대상 중 작은 값(주황 = 최대 대상이 모자람). 평타는 1명 기준 그대로. 난타·요기 폭발 6돌파 '타격 인원이 적을수록 피해 증가'는 엔진이 1명 최대치(+60/70%)로 넣어 두므로, 2명 이상이면 빼고 계산(5명 이상이면 거의 0이라고 추정).<br>
@@ -715,6 +713,12 @@ function drawSx1(){ document.querySelectorAll('[data-sxc]').forEach(c=>c.checked
  const FS=window.SXFS||[]; $('sxRes').innerHTML=FS.map(f=>f.sty==='연타'?('연타: 피해 ×'+f.M.toFixed(2)+' 상시'+(f.M>1.3?' (격노 50중첩 = 주는 피해 +20% + 보스에게 주는 피해 +20%)':' (보스 아님)')):f.sty==='파멸'?`파멸: 요기범람 1시간 ${f.Ny}회 · 켜진 비율 ${(f.u*100).toFixed(0)}% → 피해 ×${f.M.toFixed(3)}${f.Mh?' (하늘의 심판 6돌파 ×'+f.Mh.toFixed(3)+')':''} + 발동마다 쿨 초기화`:f.sty==='강타'?`강타: 영력 평균 피해 ×${f.M.toFixed(3)} · 강압 1시간 ${f.Ns}회(쿨 초기화+차지 즉발)`:'기만: 평균 쿨 0.75배').join(' · ');}
 document.querySelector('.sxp').addEventListener('change',e=>{const s=e.target.dataset.sxc; if(!s) return; if(!Array.isArray(cfg.sxs)) cfg.sxs=[]; cfg.sxs=e.target.checked?[s]:[]; cfg.sx1=''; save(); calc();});
 $('oBoss').checked=cfg.boss!==false; $('oBoss').onchange=e=>{cfg.boss=e.target.checked; fakeWin.__BOSS=cfg.boss; save(); calc();};
+// 11/23 사용자: 신식 개방 칸 → 보스/개인. 보스 = 디버프·표식·상태이상 전부 걸린 상태, 개인 = 내 덱이 거는 것만 연계 계산
+cfg.sxs=[];
+function drawMode(){document.querySelectorAll('input[name=dmode]').forEach(r=>r.checked=(r.value==='boss')===!!cfg.raid);
+ $('modeTip').textContent=cfg.raid?'보스 = 파티가 디버프·표식·상태이상(파열·파쇄·관통·원소·정밀·출혈·속박 …)을 전부 걸어 둔 상태로 보고 모든 도술의 「○○ 대상 적중 시」 효과를 켬':'개인 = 내 덱 도술이 거는 디버프·표식만. 순위표는 연계 효과 끔(회색 표시), 덱 시뮬은 내 덱에 거는 도술이 있으면 걸린 시간만큼 켬';}
+$('modeBox').addEventListener('change',e=>{if(e.target.name!=='dmode')return;cfg.raid=e.target.value==='boss';fakeWin.__RAID=cfg.raid;save();calc();});
+drawMode();
 const _calc=calc;calc=function(){_calc();drawOff();drawSx1();drawSlots();drawUlt();drawPal();drawSx();simDeck();};
 drawSlots();drawUlt();drawPal();drawSx();simDeck();drawSx1();drawOff();
 </script></body></html>
