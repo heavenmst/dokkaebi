@@ -182,7 +182,7 @@ const XBL=[['ilseom','받는 피해 증가 · 일섬 6돌파','amp',20,'A'],['pi
  ['ym_atk','공격력 증가 · 용맹의 기운','atk',20],['ym_dmg','주는 피해 증가 · 용맹의 기운 6돌파','dmg',20],
  ['sin','받는 치명타 피해 증가 · 신내림','recv',30],['ill','받는 치명타 피해 증가 · 환상술 6돌파','recv',20],['ysb','받는 치명타 피해 증가 · 용사비등 (10~35)','recv',10],
  ['gh_crd','치명타 피해 증가 · 개전의 가호','crd',10],['gh_cd','도술 재사용 대기 감소 · 개전의 가호','cd',10],['etc','기타 주는 피해 증가 (직접 입력)','dmg',0]];
-function XB(){const r={A:0,B:0,atk:0,dmg:0,recv:0,crd:0,cd:0},xb={};   // 11/23 사용자: 파티 버프 칸 없앰 — 내 개인 기준만 (저장된 체크는 무시)XBL.forEach(k=>{const o=xb[k[0]];if(!o||!o.on)return;const v=(o.v!=null&&o.v!==''?+o.v:k[3])/100;if(!v)return;
+function XB(){const r={A:0,B:0,atk:0,dmg:0,recv:0,crd:0,cd:0},xb={}; /* 11/23 사용자: 파티 버프 칸 없앰 — 내 개인 기준만 (저장된 체크는 무시) */ XBL.forEach(k=>{const o=xb[k[0]];if(!o||!o.on)return;const v=(o.v!=null&&o.v!==''?+o.v:k[3])/100;if(!v)return;
  if(k[2]==='amp'){if(k[4]==='A')r.A=Math.max(r.A,v);else r.B+=v;}else r[k[2]]+=v;});return r;}
 const XM=()=>{const x=XB();return (1+x.A+x.B)*(1+x.atk)*(1+x.dmg);};
 function xWrap(o,f){if(!o||typeof o[f]!=='function'||o[f]._xw)return;const g=o[f];const w=function(){const v=g.apply(this,arguments);if(!v)return v;const m=XM(),c=1-Math.min(0.9,XB().cd);if(m===1&&c===1)return v;return Object.assign({},v,{damage:v.damage*m,cd:v.cd*c});};w._xw=1;o[f]=w;}
