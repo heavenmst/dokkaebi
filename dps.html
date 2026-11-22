@@ -114,10 +114,6 @@ td{border-top:1px solid var(--line)}tr:nth-child(even) td{background:#FAFBFC}
     <label class="opt">표시 개수 <input type="number" id="oN" value="30" min="5" max="105"></label>
     <label class="opt">대상 수 <select id="oTg"><option value="1">1명 (단일)</option><option value="2">2명</option><option value="3">3명</option><option value="4">4명</option><option value="5">5명</option><option value="6">6명</option><option value="7">7명</option><option value="8">8명</option><option value="9">9명</option><option value="10">10명</option><option value="11">11명</option><option value="12">12명</option><option value="13">13명</option><option value="14">14명</option><option value="15">15명</option><option value="16">16명</option><option value="17">17명</option><option value="18">18명</option><option value="19">19명</option><option value="20">20명</option><option value="21">21명</option><option value="22">22명</option><option value="23">23명</option><option value="24">24명</option><option value="25">25명</option><option value="26">26명</option><option value="27">27명</option><option value="28">28명</option><option value="29">29명</option><option value="30">30명</option></select> <span class="tag">2명 이상 = 범위기만 순위</span></label>
     <div class="sub" style="margin:-2px 0 6px 0">범위기 피해 = 1명 피해 × 맞는 수(대상 수와 도술 최대 대상 중 작은 값) × 다수 타격 감소. 최대 대상·돌파 대상 증가·감소 규칙은 클라이언트 도술 자료.</div></div>
-  <div class="panel"><h2>파티·외부 버프 <span class="tag">체크 = 계산에 반영</span></h2>
-    <div class="sub" style="margin:0 0 6px 0">파티원이 걸어 주는 버프·디버프를 순위·덱 모의 전부에 곱해요. 체크하면 <b>계속 걸려 있다고</b> 보고 계산(최대치) — 가끔만 걸리면 % 칸을 줄여 넣으세요.
-    받는 피해 묶음 A(일섬·꿰뚫는 저격·요혼격·공간 결계)는 서로 덮어써서 큰 값 하나만, 다른 묶음끼리는 더함. 공격력·주는 피해·받는 피해는 서로 곱함(추정). 방어력 감소는 일반몹 방어력이 1이라 뺐어요. 내 덱에 같은 디버프가 있으면 중복 체크하지 마세요.</div>
-    <div id="xbs"></div><div id="xbSum" class="sub" style="margin-top:4px"></div></div>
   <div class="panel"><h2>도술 돌파 단계 <span class="tag">★ = 전설</span></h2>
     <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap"><button class="btn" id="bt0">전부 0</button><button class="btn" id="btL6">전설만 6</button><button class="btn" id="bt6">전부 6</button><button class="btn" id="btL10">전설만 10</button><button class="btn" id="bt10">전부 10</button><span style="margin-left:8px">일반 전부 <select id="btAllN"><option value="">선택</option><option value="0">0돌파</option><option value="1">1돌파</option><option value="2">2돌파</option><option value="3">3돌파</option><option value="4">4돌파</option><option value="5">5돌파</option><option value="6">6돌파</option><option value="7">7돌파</option><option value="8">8돌파</option><option value="9">9돌파</option><option value="10">10돌파</option></select></span><span>전설 전부 <select id="btAllL"><option value="">선택</option><option value="0">0돌파</option><option value="1">1돌파</option><option value="2">2돌파</option><option value="3">3돌파</option><option value="4">4돌파</option><option value="5">5돌파</option><option value="6">6돌파</option><option value="7">7돌파</option><option value="8">8돌파</option><option value="9">9돌파</option><option value="10">10돌파</option></select></span></div><div class="sub" style="margin:-2px 0 6px 0">일반·전설을 따로 한 번에 맞춤(그 도술 최대 돌파보다 크면 최대). 다른 쪽 설정은 그대로.</div>
     <div id="bts"></div></div>
@@ -186,7 +182,7 @@ const XBL=[['ilseom','받는 피해 증가 · 일섬 6돌파','amp',20,'A'],['pi
  ['ym_atk','공격력 증가 · 용맹의 기운','atk',20],['ym_dmg','주는 피해 증가 · 용맹의 기운 6돌파','dmg',20],
  ['sin','받는 치명타 피해 증가 · 신내림','recv',30],['ill','받는 치명타 피해 증가 · 환상술 6돌파','recv',20],['ysb','받는 치명타 피해 증가 · 용사비등 (10~35)','recv',10],
  ['gh_crd','치명타 피해 증가 · 개전의 가호','crd',10],['gh_cd','도술 재사용 대기 감소 · 개전의 가호','cd',10],['etc','기타 주는 피해 증가 (직접 입력)','dmg',0]];
-function XB(){const r={A:0,B:0,atk:0,dmg:0,recv:0,crd:0,cd:0},xb=cfg.xb||{};XBL.forEach(k=>{const o=xb[k[0]];if(!o||!o.on)return;const v=(o.v!=null&&o.v!==''?+o.v:k[3])/100;if(!v)return;
+function XB(){const r={A:0,B:0,atk:0,dmg:0,recv:0,crd:0,cd:0},xb={};   // 11/23 사용자: 파티 버프 칸 없앰 — 내 개인 기준만 (저장된 체크는 무시)XBL.forEach(k=>{const o=xb[k[0]];if(!o||!o.on)return;const v=(o.v!=null&&o.v!==''?+o.v:k[3])/100;if(!v)return;
  if(k[2]==='amp'){if(k[4]==='A')r.A=Math.max(r.A,v);else r.B+=v;}else r[k[2]]+=v;});return r;}
 const XM=()=>{const x=XB();return (1+x.A+x.B)*(1+x.atk)*(1+x.dmg);};
 function xWrap(o,f){if(!o||typeof o[f]!=='function'||o[f]._xw)return;const g=o[f];const w=function(){const v=g.apply(this,arguments);if(!v)return v;const m=XM(),c=1-Math.min(0.9,XB().cd);if(m===1&&c===1)return v;return Object.assign({},v,{damage:v.damage*m,cd:v.cd*c});};w._xw=1;o[f]=w;}
@@ -257,11 +253,11 @@ function drawOff(){ drawW(); const el=$('offs'); if(!el) return; const off=cfg.o
   if(cr.sure) items.push([key,'sure',k.n+' · 확정 치명 3초']); });
  el.innerHTML=items.length?'<div class="sub" style="margin:4px 0 2px 0"><b>내 덱 버프·디버프</b> — 체크 해제 = 계산에서 뺌 (순위·덱 모의 모두). 덱에 없는 도술은 순위표의 「효과 ▾」를 열고 효과 글자를 누르면 빠져요</div>'+items.map(([key,kd,lab])=>`<label class="opt" style="margin:2px 0 2px 10px"><input type="checkbox" data-off="${key}:${kd}" ${off[key+':'+kd]?'':'checked'}> ${lab}</label>`).join(''):''; }
 $('offs').addEventListener('change',e=>{const a=e.target.dataset.off;if(!a)return;if(!cfg.off)cfg.off={};if(e.target.checked)delete cfg.off[a];else cfg.off[a]=1;save();calc();});
-function drawXB(){const xb=cfg.xb||(cfg.xb={});
+function drawXB(){if(!$('xbs'))return;const xb=cfg.xb||(cfg.xb={});
  $('xbs').innerHTML=XBL.map(k=>{const o=xb[k[0]]||{};return `<label class="opt" style="margin:3px 0"><input type="checkbox" data-xb="${k[0]}" ${o.on?'checked':''}> <span style="flex:1">${k[1]}${k[4]?' <span class="tag">묶음 '+k[4]+'</span>':''}</span><input type="number" data-xbv="${k[0]}" value="${o.v!=null&&o.v!==''?o.v:k[3]}" style="width:56px" step="1"> %</label>`;}).join('');
  const x=XB(),m=XM(); $('xbSum').innerHTML=(m>1||x.recv||x.crd||x.cd)?`→ 피해 ×${m.toFixed(3)}${x.recv?` · 받는 치명 피해 +${Math.round(x.recv*100)}%`:''}${x.crd?` · 치명 피해 +${Math.round(x.crd*100)}%`:''}${x.cd?` · 쿨 −${Math.round(x.cd*100)}%`:''}`:'체크한 버프 없음';}
 drawXB();
-$('xbs').addEventListener('change',e=>{const xb=cfg.xb||(cfg.xb={});const a=e.target.dataset.xb,b=e.target.dataset.xbv;if(a){(xb[a]=xb[a]||{}).on=e.target.checked;}else if(b){(xb[b]=xb[b]||{}).v=e.target.value;}else return;save();drawXB();calc();});
+$('xbs')&&$('xbs').addEventListener('change',e=>{const xb=cfg.xb||(cfg.xb={});const a=e.target.dataset.xb,b=e.target.dataset.xbv;if(a){(xb[a]=xb[a]||{}).on=e.target.checked;}else if(b){(xb[b]=xb[b]||{}).v=e.target.value;}else return;save();drawXB();calc();});
 $('bt0').onclick=()=>{cfg.bt={};drawBT();save();calc();};
 $('btL10').onclick=()=>{cfg.bt={};D.skills.forEach(k=>{if(isLeg(k)&&canBT(k))cfg.bt[k.id]=btMax(k);});drawBT();save();calc();};
 $('bt10').onclick=()=>{cfg.bt={};D.skills.forEach(k=>{if(canBT(k))cfg.bt[k.id]=btMax(k);});drawBT();save();calc();};
