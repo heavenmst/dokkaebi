@@ -135,7 +135,7 @@ details.how{margin-top:6px}
     <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:4px 0 8px" id="needits"></div>
     <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 6px">
       <label style="font-weight:700">내 전투력 ± </label><input id="pwr" type="number" step="10" min="0" value="100" style="width:90px"><b>K</b>
-      <span style="color:var(--dim);font-size:12px">왼쪽 「내 전투력」 기준 · 몬스터 투력이 이 범위 안인 단일 비경·필드 전부 (전투력 비우면 전부)</span></div>
+      <span style="color:var(--dim);font-size:12px">왼쪽 「내 전투력」 ± 범위 안 단일 비경·필드만 (전투력 비우면 기준 사냥터 몬스터 투력 기준)</span></div>
     <div id="needbox"></div>
     <details class="how"><summary>계산 방식 · 설명 보기</summary><ul><li>이 이상 잡으면 이득 = 왼쪽 「이득 기준」으로 고른 항목을 지금 사냥터만큼 얻으려면 분당 몇 마리 잡아야 하는지. 아이템을 엽전으로 바꾸는 가치 계산은 하지 않아요. 오른쪽 시간당 칸은 모든 사냥터를 지금 분당 처치 수로 잡는다고 보고 게임 데이터 드랍률로 계산(금색 = 이득 기준 항목).</li><li>초록 = 지금보다 적게 잡아도 이득 · 노랑 = 비슷 · 빨강 = 더 많이 잡아야 함. 줄을 누르면 아래에 그 사냥터 몬스터가 나와요. 같은 사냥터 안 구역은 몬스터 레벨·전투력이 달라서 나눴어요(세부 지역은 마우스 올리면 보여요).</li></ul></details>
   </div>
@@ -208,7 +208,8 @@ function render(){
 const NEED_ALL=[['엽전','엽전',0],['요혼석','요혼석',1],['가속분','영기 수련권(분)',0],['전설재료','전설 재료',2],['조화단','조화단',3],['정기단','정기단',1]];
 let NEED_SEL=ld('needsel',['엽전','요혼석','가속분']);
 function drawNeedIts(){$('needits').innerHTML='<b style="font-size:13px">비교할 것</b>'+NEED_ALL.map(([k,n])=>`<label style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border:1px solid var(--line);border-radius:14px;cursor:pointer;font-size:13px;${NEED_SEL.includes(k)?'background:#EAF0FF;border-color:var(--acc)':''}"><input type="checkbox" data-nk="${k}" ${NEED_SEL.includes(k)?'checked':''} style="margin:0">${icoTag(k)}${n}</label>`).join('');}
-function renderNeed(ci,kpm){const cz=Z[ci],my=(+$('mypw').value||0)*1000,R=($('pwr').value===''?100:Math.max(0,+$('pwr').value||0))*1000;
+function renderNeed(ci,kpm){const cz=Z[ci],my=((+$('mypw').value||0)*1000)||cz.pw,   // 11/23 전투력 비우면 기준 사냥터 몬스터 투력 ± 범위
+ R=($('pwr').value===''?100:Math.max(0,+$('pwr').value||0))*1000;
   const inR=z=>!my||(z.pw>=my-R&&z.pw<=my+R);const IT=NEED_ALL.filter(([k])=>NEED_SEL.includes(k));
   const isS=z=>/^\[상시 비경\] 고독한/.test(z.z);
   const L=Z.map((z,i)=>({z,i})).filter(r=>(isS(r.z)||!r.z.dun)&&(inR(r.z)||r.i===ci)).sort((a,b)=>a.z.pw-b.z.pw||(a.i===ci?-1:1));
