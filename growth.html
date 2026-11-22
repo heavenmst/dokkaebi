@@ -64,7 +64,7 @@ img.ic{width:22px;height:22px;vertical-align:middle;object-fit:contain;flex:none
   <label><span>사냥터</span><select id="huntPlace"></select></label>
   <label><span>단계</span><select id="huntLv"></select></label>
   <label><span>분당 처치 수</span><input type="number" id="huntKpm" step="0.1" min="0"></label>
-  <label><span>하루 플레이 시간(비경 포함)</span><input type="number" id="huntHours" step="0.5" min="2" max="24"></label>
+  <label><span>하루 플레이 시간(비경 포함)</span><input type="number" id="huntHours" step="0.5" min="0" max="24"></label>
  </div>
  <div class="card">
   <h2>단각 분해 (하루)</h2>
@@ -114,9 +114,9 @@ const fmt = (x,d=0) => (x==null||!isFinite(x)) ? '-' : Number(x).toLocaleString(
 const man = x => !isFinite(x)?'-':(x===0?'0':fmt(x/1e4,Math.abs(x)>=1e5?1:2)+'만');   // 11/23 사용자: 엽전은 만 단위
 const P = n => D.places.find(p=>p.name===n);
 const DEF = {
- huntPlace:'[상시 비경] 고독한 귀족 지구', huntLv:'85', huntKpm:4, huntHours:23, extraCoin:0, extraYh:0, extraSkb:0,   // 11/23 사용자: 처음 들어오는 사람은 0, 이후엔 마지막 입력 기억
+ huntPlace:'[상시 비경] 고독한 귀족 지구', huntLv:'85', huntKpm:0, huntHours:0, extraCoin:0, extraYh:0, extraSkb:0,   // 11/23 사용자: 처음 들어오는 사람은 0, 이후엔 마지막 입력 기억
  haveCoin:0, haveYh:0, haveBook:0, haveSkb:0, haveCheon:0,
- mangLv:'99', mangKpm:70, oldLv:'99', oldKpm:70, tickets:'0', mode:'opt',
+ mangLv:'99', mangKpm:0, oldLv:'99', oldKpm:0, tickets:'0', mode:'opt',
  goals:[{type:'equip',part:'Weapon',cur:0,to:0,trCur:0,trTo:0}]
 };
 let S;
