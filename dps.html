@@ -96,8 +96,13 @@ td{border-top:1px solid var(--line)}tr:nth-child(even) td{background:#FAFBFC}
   <div class="panel"><h2>계산 옵션</h2>
     <label class="opt"><input type="checkbox" id="oCharge" checked>차지 시간 포함 (차지 끝난 뒤 쿨 시작)</label>
     <label class="opt"><input type="checkbox" id="oDot" checked>지속 피해 포함 (화상·출혈: 1명=쿨만큼, 2명↑=<input id="oDotS" type="number" min="0" max="20" step="0.5" style="width:40px">초×인원)</label>
+    <label class="opt"><input type="checkbox" id="oWBuf">내 버프 덱 전체 적용 <span class="tag" style="margin:0">공격력·주는 피해 증가</span></label>
+    <label class="opt"><input type="checkbox" id="oWDeb">내 디버프 덱 전체 적용 <span class="tag" style="margin:0">받는 피해·받는 치명 피해 증가</span></label>
+    <div class="sub" style="margin:0 0 4px 26px">체크 = 덱 도술이 거는 효과를 덱 전체 피해에 넣음. 계속 걸려 있지 않으면 지금 덱을 1시간 돌려 본 가동률만큼만 (순위표 = 평균, 덱 시뮬 = 시간대별 그대로). 해제 = 건 도술 자기 피해에만.</div>
+    <div id="wSum" class="sub" style="margin:0 0 6px 26px"></div>
+    <details style="margin:0 0 6px 0"><summary class="sub" style="cursor:pointer">세부 — 효과 하나씩 빼기 · 레이드용 깡딜</summary>
     <label class="opt"><input type="checkbox" id="oNoDeb">적 디버프 빼기 <span class="tag" style="margin:0" title="방어력 감소·받는 피해 증가·받는 치명 피해를 계산에서 뺌 — 레이드는 남이 걸어주니 깡딜로 비교. 내 버프(공격력·주는 피해 증가)는 그대로">레이드용 깡딜</span></label>
-    <div id="offs" style="margin:2px 0 6px 0"></div>
+    <div id="offs" style="margin:2px 0 6px 0"></div></details>
     <label class="opt"><input type="checkbox" id="oUlt">궁극기 포함</label>
     <label class="opt"><input type="checkbox" id="oLw">전설 무기 옵션 <select id="oLwS"></select> 피해 +10%</label>
     <label class="opt"><input type="checkbox" id="oAA">평타 딜로스 적용 (차지하는 동안 못 친 평타만큼 뺌)</label>
@@ -167,7 +172,14 @@ const fakeLS={getItem:()=>null,setItem:noop,removeItem:noop};const fakeWin={docu
 fakeWin.window=fakeWin;fakeWin.self=fakeWin;
 let K=null, engineErr='';
 const ENGINE_SRC2=ENGINE_SRC.replace('normals.forEach(function (m) { n5[m.style] = (n5[m.style] || 0) + 1; });','normals.forEach(function (m) { n5[m.style] = (n5[m.style] || 0) + 1; }); var __u = members.filter(function (m) { return m.u; })[0]; for (var __k in n5) if (!__u || __k !== __u.style) delete n5[__k];').replace("var AMP_HIT = {","var AMP_HIT = { '주술/영혼 소용돌이': 0.10, '강타/천벌': 0.10, '강타/연속 충격': 0.10, ").replace('return !m.u; }).slice(0, 5)','return !m.u; }).slice(0, window.__N5 || 5)').replace('var dmg = (pick.damage + add + formAdd) * mult;','var dmg = (pick.damage + (add + formAdd) * (window.__XM ? window.__XM() : 1)) * mult;').replace('if (ampHit[key] != null) {','if (ampHit[key] != null && !(window.__OFF && window.__OFF(key, "amp"))) {').replace('if (ta) {','if (ta && !(window.__OFF && window.__OFF(key, "amp"))) {').replace('if (BUFF_DMG[key]) buffs[','if (BUFF_DMG[key] && !(window.__OFF && window.__OFF(key, "atk"))) buffs[').replace('if (tb) buffs[tb[1]]','if (tb && !(window.__OFF && window.__OFF(key, "dmg"))) buffs[tb[1]]').replace('window.KKSkillNumbers = {','window.__KKRun = (typeof motionRun==="function")?motionRun:null; window.__KKInputs = motionInputs; window.KKSkillNumbers = {');
-try{ new Function('window','self','document','localStorage', ENGINE_SRC2)(fakeWin,fakeWin,fakeDoc,fakeLS); K=fakeWin.KKSkillNumbers; K.useData(D);}catch(e){engineErr=String(e);}
+// 11/23 사용자: 덱 전체 적용 / 자기만 적용 전환 — 엔진이 거는 효과 창을 __OFF 로 끄고, __EW 로 창을 기록해 1시간 가동률 계산
+const ENGINE_SRC3=ENGINE_SRC2.split('ampUntil = now + AMP_SEC; }').join('ampUntil = now + AMP_SEC; if (window.__EW) window.__EW("amp", key, now, ampUntil, ampVal); }')
+ .replace('now + BUFF_DMG[key][2]];','now + BUFF_DMG[key][2]], window.__EW && window.__EW("atk", key, now, now + BUFF_DMG[key][2], buffs[BUFF_DMG[key][0]][0]);')
+ .replace('now + tb[3]];','now + tb[3]], window.__EW && window.__EW("dmg", key, now, now + tb[3], buffs[tb[1]][0]);')
+ .replace('if (sp) { rupVal','if (sp && !(window.__OFF && window.__OFF(key, "amp"))) { rupVal')
+ .replace('rupUntil = now + STATUS_AMP_SEC; }','rupUntil = now + STATUS_AMP_SEC; if (window.__EW) window.__EW("amp", key, now, rupUntil, rupVal); }')
+ .replace('if (sb) buffs[sb[1]] = [sb[2], now + STATUS_BUFF_SEC];','if (sb && !(window.__OFF && window.__OFF(key, "dmg"))) { buffs[sb[1]] = [sb[2], now + STATUS_BUFF_SEC]; if (window.__EW) window.__EW("dmg", key, now, now + STATUS_BUFF_SEC, sb[2]); }');
+try{ new Function('window','self','document','localStorage', ENGINE_SRC3)(fakeWin,fakeWin,fakeDoc,fakeLS); K=fakeWin.KKSkillNumbers; K.useData(D);}catch(e){engineErr=String(e);}
 // 11/19 사용자: 파티 버프(피해 증가 20% 같은 것)를 체크리스트로 켜고 끄기. [키, 이름, 종류, 기본 %, 묶음]
 const XBL=[['ilseom','받는 피해 증가 · 일섬 6돌파','amp',20,'A'],['pierce','받는 피해 증가 · 꿰뚫는 저격/요혼격/공간 결계','amp',10,'A'],
  ['mark','받는 피해 증가 · 표식 (파열→내려찍기·내려치기 / 파쇄→연쇄 번개·화염 분출)','amp',10,'B'],
@@ -182,7 +194,13 @@ xWrap(K,'motionInputs');xWrap(fakeWin,'__KKInputs');fakeWin.__XM=XM;
 // 11/19 사용자: 계산에 들어가는 내 덱 버프·디버프를 하나씩 빼기. cfg.off['스타일/도술:종류']=1 이면 뺌
 const OFFK=lab=>/^공격력/.test(lab)?'atk':/^주는 피해/.test(lab)?'dmg':/^받는 치명/.test(lab)?'recv':/^받는 피해/.test(lab)?'amp':/^방어력/.test(lab)?'def':'etc';
 const isOff=(key,kind)=>!!(cfg.off&&cfg.off[key+':'+kind]);
-fakeWin.__OFF=isOff;
+// 엔진 쪽 끄기: 효과별 빼기 + 덱 전체 적용 해제(그 종류는 자기 피해에만 → 엔진 창은 끔)
+function wideOn(kd){return (kd==='amp'||kd==='recv')?(!!cfg.wdeb&&!cfg.nodeb):(kd==='atk'||kd==='dmg')?!!cfg.wbuf:false;}
+fakeWin.__OFF=(key,kind)=>isOff(key,kind)||((kind==='amp'||kind==='atk'||kind==='dmg')&&!wideOn(kind));
+// 엔진이 시간대별로 다루는 효과 (나머지는 덱 전체 모드여도 자기 피해에만)
+const ENG_MOD=(()=>{const g=nm=>{const m=ENGINE_SRC3.match(new RegExp('var '+nm+' = \\{([^}]*)\\}'));return m?(m[1].match(/'[^']+'/g)||[]).map(x=>x.slice(1,-1)).filter(x=>x.includes('/')):[];};
+ const M=(K&&(K.MODEL||K.model))||{};return {amp:new Set([...g('AMP_HIT'),...g('TR_AMP'),...Object.keys(M.STATUS_AMP||{})]),atk:new Set(g('BUFF_DMG')),dmg:new Set([...g('TR_BUFF'),...Object.keys(M.STATUS_BUFF||{})])};})();
+const engMod=(key,kd)=>kd==='recv'?true:!!(ENG_MOD[kd]&&ENG_MOD[kd].has(key));
 const S=D.styles.map(s=>s.n), COL=D.styles.map(s=>s.col);
 const CHAIN_ON=D.skills.filter(k=>K&&K.hasChain&&K.hasChain(k)).map(k=>k.id);
 // 연계 포함 타격 수 (엔진 chainHits 와 같게: 묵직한 주먹 2+2=4타, 은신 급습 1타)
@@ -225,7 +243,13 @@ $('bts').addEventListener('click',e=>{ const b=e.target.closest('[data-b6]'), g=
  if(b){ const id=+b.dataset.b6, k=SK(id), six=Math.min(6,btMax(k)); cfg.bt[id]=(cfg.bt[id]||0)>=six?0:six; }
  else if(g){ e.preventDefault(); const si=+g.dataset.st6; D.skills.forEach(k=>{if(k.st===si&&canBT(k))cfg.bt[k.id]=Math.min(6,btMax(k));}); }
  else return; drawBT(); save(); calc(); });
-function drawOff(){ const el=$('offs'); if(!el) return; const off=cfg.off||{}, items=[];
+function drawW(){ const el=$('wSum'); if(!el) return; const KN={amp:'받는 피해',atk:'공격력',dmg:'주는 피해',recv:'받는 치명 피해'};
+ if(!wideOn('atk')&&!wideOn('amp')){ el.innerHTML=cfg.nodeb&&cfg.wdeb?'레이드용 깡딜 켜짐 — 디버프는 계산에서 뺌':'둘 다 해제 — 효과는 건 도술 자기 피해에만'; return; }
+ const W=deckW(); if(!W){ el.innerHTML='덱이 비어 있으면 자기 피해에만 넣어요'; return; }
+ el.innerHTML=W.list.length?'지금 덱 1시간 가동률: '+W.list.map(x=>`${D.skills.find(k=>S[k.st]+'/'+k.n===x.key)?x.key.split('/')[1]:x.key} ${KN[x.kind]} +${Math.round(x.v*100)}% <b>${Math.round(x.up*100)}%</b>`).join(' · ')
+  +`<br>→ 덱 전체 평균 피해 <b style="color:#7FD1A0">×${W.M.toFixed(3)}</b>${W.critF>1.0005?` · 치명 기대 <b style="color:#7FD1A0">×${W.critF.toFixed(3)}</b>`:''}${cfg.nodeb?' · 레이드용 깡딜 켜짐(디버프 뺌)':''}`
+  :'지금 덱에는 덱 전체로 걸리는 버프·디버프가 없어요 (자기 피해용 효과는 그대로)'; }
+function drawOff(){ drawW(); const el=$('offs'); if(!el) return; const off=cfg.off||{}, items=[];
  (cfg.deck||[]).filter(x=>x!=null).forEach(id=>{ const k=SK(id), key=S[k.st]+'/'+k.n, st=Math.min(cfg.bt[k.id]||0,btMax(k));
   const sv=cfg.off; cfg.off={}; const ef=effOf(k,st), cr=critOf(k,st); cfg.off=sv;
   const seen={}; ef.forEach(x=>{const kd=OFFK(x.lab); if(kd==='etc'||kd==='def'||seen[kd])return; seen[kd]=1; items.push([key,kd,k.n+' · '+x.lab+(x.dur?' '+x.dur:'')]);});
@@ -248,7 +272,8 @@ $('btL6').onclick=()=>{cfg.bt={};D.skills.forEach(k=>{if(isLeg(k)&&canBT(k))cfg.
 $('bt6').onclick=()=>{cfg.bt={};D.skills.forEach(k=>{if(canBT(k))cfg.bt[k.id]=Math.min(6,btMax(k));});drawBT();save();calc();};
 // 옵션
 if(cfg.dotS==null)cfg.dotS=2; $('oDotS').value=cfg.dotS; $('oDotS').oninput=e=>{cfg.dotS=parseFloat(e.target.value);save();calc();};
-[['oNoDeb','nodeb'],['oCharge','charge'],['oDot','dot'],['oUlt','ult']].forEach(([id,k])=>{$(id).checked=cfg[k];$(id).onchange=e=>{cfg[k]=e.target.checked;save();calc();};});
+if(cfg.wbuf==null)cfg.wbuf=true; if(cfg.wdeb==null)cfg.wdeb=true;
+[['oWBuf','wbuf'],['oWDeb','wdeb'],['oNoDeb','nodeb'],['oCharge','charge'],['oDot','dot'],['oUlt','ult']].forEach(([id,k])=>{$(id).checked=cfg[k];$(id).onchange=e=>{cfg[k]=e.target.checked;save();calc();};});
 $('oAA').checked=cfg.aa;$('oAA').onchange=e=>{cfg.aa=e.target.checked;save();calc();};
 $('oAAp').value=cfg.aap;$('oAAh').value=cfg.aah;$('oWep').value=cfg.wep||'far';
 $('oWep').onchange=e=>{cfg.wep=e.target.value;cfg.aap=cfg.wep==='near'?84:70;$('oAAp').value=cfg.aap;save();calc();};
@@ -308,10 +333,32 @@ function effOf(k,st){ const out=[], seen={}, KY=S[k.st]+'/'+k.n; const add=(lab,
  (k.hit||[]).forEach(h=>{ if(h.t!=='강화'&&h.t!=='약화') return; if(/자신의 받는|받는 피해 감소|받는 피해를/.test((h.l||[]).join(' ')+h.n)&&!/증가/.test((h.l||[]).join(' '))) return; scan((h.l||[]).join(' '),h.d&&h.d!=='지속'?h.d:''); });
  const sx=k.num&&k.num.tr&&k.num.tr.sx; if(sx&&st>=(sx.from||6)) (sx.l||[]).forEach(l=>{ if(/^(도술 )?피해량/.test(l)||/요기범람/.test(l)) return; scan(l,'6돌파'); });
  return out; }
+// 자기 피해에만 넣을 효과 = 덱 전체 모드가 아니거나, 덱 전체로 따로 계산하는(modFn) 효과가 아닌 것
+function selfEf(k,st,modFn){const KY=S[k.st]+'/'+k.n;return effOf(k,st).map(x=>{const kd=OFFK(x.lab);if(x.apply&&wideOn(kd)&&modFn(KY,kd))return Object.assign({},x,{apply:false,wide:true});return x;});}
+function recvDur(k,st){let d=10;(k.hit||[]).forEach(h=>{if(/받는 치명타 피해/.test((h.l||[]).join(' '))){const m=String(h.d||'').match(/([\d.]+)\s*초/);if(m)d=+m[1];}});return d;}
+// 지금 덱을 엔진으로 1시간 돌려 효과 창 가동률 → 순위표에 평균으로 곱함 (0.1초 칸)
+let _W=null,_WK='';
+function deckW(){ const ids=(cfg.deck||[]).filter(x=>x!=null); if(!ids.length||!(wideOn('atk')||wideOn('amp'))) return null;
+ const wk=JSON.stringify([cfg.deck,cfg.lv,cfg.bt,cfg.wbuf,cfg.wdeb,cfg.nodeb,cfg.charge,cfg.off||{},cfg.crp,cfg.crd,cfg.xb||{}]); if(wk===_WK) return _W;
+ _WK=wk; _W=null; const run=fakeWin.__KKRun, inp=fakeWin.__KKInputs; if(!run||!inp) return null;
+ const T=3600, N=36000, ks=ids.map(id=>D.skills[id]), members=[], order=[];
+ ks.forEach(k=>{const bt=Math.min(cfg.bt[k.id]||0,btMax(k)); const v=inp(k,cfg.lv,bt,CHAIN_ON); const m={id:k.id,n:k.n,style:S[k.st],u:!!k.u,hits:v&&v.hits!=null?v.hits:HITS(k),stacks:k.ms||1}; members.push(m);
+  if(v) order.push(Object.assign({},m,{damage:v.damage,cd:v.cd+(cfg.charge?v.cm:0),motion:v.motion,gr:v.gr,pm:v.pm,cm:v.cm,base:v.base,stages:v.stages,bv:v.bv,bt:v.bt,tbv:v.tbv}));});
+ if(!order.length) return null;
+ const W=[], ev=[], lg=[]; fakeWin.__EW=(kind,key,a,b,v)=>W.push([kind,key,a,b,v]);
+ try{ fakeWin.__N5=cfg.n5||5; run(order,members,T,null,ev,0,lg,null); }catch(e){ console.error(e); } fakeWin.__EW=null;
+ if(wideOn('recv')){ const by={}; ks.forEach(k=>by[S[k.st]+'/'+k.n]=k);
+  ev.forEach((e,i)=>{const k=by[e[1]+'/'+e[2]]; if(!k) return; const st=Math.min(cfg.bt[k.id]||0,btMax(k)), cr=critOf(k,st); if(cr.recv>0) W.push(['recv',S[k.st]+'/'+k.n,lg[i][1],lg[i][1]+recvDur(k,st),cr.recv]);}); }
+ const G={}; W.forEach(([kind,key,a,b,v])=>{const id=kind+'|'+key, g=G[id]||(G[id]={kind,key,a:new Float32Array(N)}); const i0=Math.max(0,Math.floor(a*10)), i1=Math.min(N,Math.ceil(b*10)); for(let i=i0;i<i1;i++) if(g.a[i]<v) g.a[i]=v;});
+ const gs=Object.values(G), c0=critE(0); let sM=0,sA=0,sC=0;
+ for(let i=0;i<N;i++){ let amp=0,atk=0,dmg=0,rv=0; for(const g of gs){const v=g.a[i]; if(!v) continue; if(g.kind==='amp') amp=Math.max(amp,v); else if(g.kind==='atk') atk+=v; else if(g.kind==='dmg') dmg+=v; else rv+=v;}
+  sM+=(1+amp)*(1+atk)*(1+dmg); sA+=1+amp; sC+=critE(rv); }
+ const list=gs.map(g=>{let on=0,sum=0; for(let i=0;i<N;i++) if(g.a[i]){on++;sum+=g.a[i];} return {kind:g.kind,key:g.key,up:on/N,v:on?sum/on:0};}).sort((a,b)=>b.up*b.v-a.up*a.v);
+ _W={M:sM/N,ampF:sA/N,critF:sC/N/c0,list,ids:new Set(ids)}; return _W; }
 const effMul=e=>1+e.filter(x=>x.apply).reduce((a,x)=>a+x.v,0)/100;
 // 주변 적 타격만 디버프 뒤에 맞는 도술(LAST_AOE)은 그 몫만큼만 자기 피해에 디버프를 반영 (본 대상 2타는 디버프 전)
 const effMulK=(k,st,e)=>{const la=lastAoe(k,st),m=effMul(e);if(!la)return m;const h=tgtInfo(k,st).mul,deb=e.filter(x=>x.apply&&x.deb).reduce((a,x)=>a+x.v,0)/100;return m-deb/h;};
-const effTags=e=>e.map(x=>{const t=x.ok&&/:(amp|atk|dmg|recv)$/.test(x.ok);return `<span class="tag" ${t?`data-toff="${x.ok}"`:''} style="color:${x.apply?'#7FD1A0':'#999'}${t?';cursor:pointer;text-decoration:underline dotted':''}" title="${t?'클릭 = 이 효과 빼기/넣기 · ':''}${x.apply?'이 도술 피해에 반영':'표시만 (계산 미반영)'}">${x.lab}${x.dur?' '+x.dur:''}</span>`;}).join(' ');
+const effTags=e=>e.map(x=>{const t=x.ok&&/:(amp|atk|dmg|recv)$/.test(x.ok);return `<span class="tag" ${t?`data-toff="${x.ok}"`:''} style="color:${x.apply?'#7FD1A0':x.wide?'#6FA8FF':'#999'}${t?';cursor:pointer;text-decoration:underline dotted':''}" title="${t?'클릭 = 이 효과 빼기/넣기 · ':''}${x.apply?'이 도술 피해에 반영':x.wide?'덱 전체 가동률로 반영 (위 계산 옵션)':'표시만 (계산 미반영)'}">${x.lab}${x.dur?' '+x.dur:''}</span>`;}).join(' ');
 // ===== 치명타 =====
 // 클라이언트 combatconfig: CriDmgUpDownMin_Val=1.1 · attributepc 기본 CriticalDamageUp=2000(×0.0001=20%) · CriRateMax_Val=0.8
 // → 치명 배율 = max(1.1, 1 + 치명타 피해%) , 확률 상한 80%
@@ -333,7 +380,11 @@ var calc=function(){ if(!K){$('rows').innerHTML='<tr><td colspan="7">계산 엔�
     const st=Math.min(cfg.bt[k.id]||0,btMax(k)); const ti=tgtInfo(k,st); if((+cfg.tg||1)>1&&!(tgtCap(k,st)>1))return; let v=null; try{v=K.motionInputs(k,cfg.lv,st,CHAIN_ON);}catch(e){} if(!v)return;
     const dotCap=ti.hit>1?dotS():(v.cd+(cfg.charge?(k.num.cm||0)/1000:0)), dot=cfg.dot?dotOf(k,dotCap):0, ch=cfg.charge?(k.num.cm||0)/1000:0, cyc=Math.max(v.cd+ch,v.motion);
     const chT=(k.num.cm||0)/1000, aaLoss=cfg.aa?chT*aaps:0;   // 11/01 사용자: 모션은 빼고 차지 시간 동안 못 나간 평타만
-    const ef=effOf(k,st), em=effMulK(k,st,ef), cr=critOf(k,st), crm=critMul(cr,false);
+    const W=deckW(), inD=!!(W&&W.ids.has(k.id));
+    const ef=W?selfEf(k,st,(key,kd)=>inD&&engMod(key,kd)):effOf(k,st), cr=critOf(k,st); let em=effMulK(k,st,ef), crm=critMul(cr,false);
+    if(W){ const ownAmp=ef.filter(x=>x.apply&&OFFK(x.lab)==='amp').reduce((a,x)=>a+x.v,0)/100;   // 덱 밖 도술이 자기 받는 피해를 걸면 덱 평균과 큰 쪽(같은 종류는 덮어씀)
+      em*=(!inD&&ownAmp>0)?W.M/W.ampF*Math.max(1,W.ampF/(1+ownAmp)):W.M;
+      if(wideOn('recv')){ const c0=critMul({sure:cr.sure,recv:0},false)*W.critF; crm=(inD&&cr.recv>0)?c0:Math.max(crm,c0); } }
     if(lastAoe(k,st)) ef.forEach(x=>{if(x.deb&&x.apply)x.lab+=' · 이 도술 2타에는 미반영';});
     const dmg=(v.damage*crm+dot)*lwMul(k)*em*ti.mul-aaLoss;
     rows.push({k,st,dmg,dot,dotCap,aaLoss,mo:chT,cd:v.cd,ch,cyc,ps:dmg/cyc,ef,em,cr,crm,ti,busy:v.motion,pb:dmg/Math.max(0.1,v.motion)}); });
@@ -502,13 +553,14 @@ function member(k){const bt=Math.min(cfg.bt[k.id]||0,btMax(k));let v=null;try{v=
  const n=k.num||{},cm=(n.cm||0)/1000;
  if(!v){let cd=n.cd||10;try{cd=K.cooldown(k,bt)||cd;}catch(e){}v={damage:0,cd:cd,motion:(n.pm||0)+cm+((n.m||600)/1000),hits:null,gr:1};}
  return {k:k,u:!!k.u,style:S[k.st],key:S[k.st]+'/'+k.n,bt:bt,dmg:(v.damage+(cfg.dot?dotFor(k,bt):0))*lwMul(k)*tgtInfo(k,bt).mul,cd:v.cd,motion:v.motion,cm:cm,hits:v.hits!=null?v.hits:HITS(k),gr:v.gr||1,
-  stacks:k.ms||1,charges:k.ms||1,recharge:null,casts:0,total:0,cr:critOf(k,bt),bv:v.bv,tbv:v.tbv};}
+  stacks:k.ms||1,charges:k.ms||1,recharge:null,casts:0,total:0,cr:critOf(k,bt),bv:v.bv,tbv:v.tbv,rd:recvDur(k,bt),
+  sfA:effMulK(k,bt,selfEf(k,bt,(key,kd)=>kd==='amp'?AMP[key]!=null:(kd==='atk'||kd==='dmg')?key==='헌신/용맹의 기운':kd==='recv'))};}
 function simDeck(){ if(!K)return;
  const T=cfg.mins*60,aaps=cfg.aap*cfg.aah*critE(0)*XM(),op=opened(),on=s=>sxOn(s,op);
  const ms=cfg.deck.filter(x=>x!=null).map(id=>member(SK(id)));
  if(!ms.length){$('dRes').innerHTML='<div class="warn">카드를 칸에 넣어 주세요</div>';return;}
  let g=1;if(on('연타'))g*=1.2;if(on('강타'))g*=1.1;if(on('척살'))g*=1.2;if(on('제압'))g*=1.06;if(on('저격'))g*=1.25;if(on('파멸'))g*=1.2;
- let t=0,aa=0,aaT=0,ampU=-1,ampV=0,buffU=-1,buffV=0,tears=0,guard=0,sureU=-1;
+ let t=0,aa=0,aaT=0,ampU=-1,ampV=0,buffU=-1,buffV=0,tears=0,guard=0,sureU=-1; const rA={};
  while(t<T-1e-9&&guard++<200000){
   for(const m of ms){while(m.recharge!=null&&m.recharge<=t+1e-9&&m.charges<m.stacks){m.charges++;m.recharge=m.charges>=m.stacks?null:m.recharge+m.cd;}}
   const p=ms.find(m=>m.charges>0);
@@ -520,7 +572,8 @@ function simDeck(){ if(!K)return;
   if(on('파멸')&&p.key==='파멸/하늘의 심판'&&p.bt>=6)mult*=1.5;
   if(on('기동')&&p.u)mult*=1.5;
   if(t<ampU)mult*=1+ampV; if(t<buffU)mult*=1+buffV;
-  const form=(p.u&&on('절명'))?125*p.hits*p.gr*XM():0, dmg=(p.dmg+form)*mult*critMul(p.cr,t<sureU);
+  let rvA=0; for(const q in rA) if(rA[q][0]>t) rvA+=rA[q][1];
+  const form=(p.u&&on('절명'))?125*p.hits*p.gr*XM():0, dmg=(p.dmg+form)*mult*p.sfA*critMul(wideOn('recv')?{sure:p.cr.sure,recv:rvA}:p.cr,t<sureU);
   p.total+=dmg;p.casts++;
   const st=t;let cd=p.cd;if(p.u&&on('제압'))cd=Math.max(0,cd-9);
   p.charges--;if(p.recharge==null)p.recharge=st+Math.max(cd+(cfg.charge?p.cm:0),p.motion);
@@ -528,8 +581,9 @@ function simDeck(){ if(!K)return;
   if(on('절명')&&!p.u)for(const m of ms)if(m.u&&m.style==='절명'&&m.recharge!=null)m.recharge=Math.max(t,m.recharge-6);
   if(on('강타')&&p.u)for(const m of ms)if(!m.u){m.charges=m.stacks;m.recharge=null;}
   if(on('기만')){tears=Math.min(2,tears+1);if(tears>=2&&!p.u&&p.recharge!=null){p.recharge=st+Math.max(cd*0.5,p.motion);tears=0;}}
-  if(AMP[p.key]!=null&&!isOff(p.key,'amp')){ampV=AMP[p.key];ampU=t+5;}
-  if(p.key==='헌신/용맹의 기운'){buffU=t+10;buffV=(1+(isOff(p.key,'atk')?0:(p.bv!=null?p.bv:0.15)))*(1+(isOff(p.key,'dmg')?0:(p.tbv||0)))-1;}
+  if(AMP[p.key]!=null&&!isOff(p.key,'amp')&&wideOn('amp')){ampV=AMP[p.key];ampU=t+5;}
+  if(wideOn('recv')&&p.cr.recv>0) rA[p.key]=[t+p.rd,p.cr.recv];
+  if(p.key==='헌신/용맹의 기운'&&wideOn('atk')){buffU=t+10;buffV=(1+(isOff(p.key,'atk')?0:(p.bv!=null?p.bv:0.15)))*(1+(isOff(p.key,'dmg')?0:(p.tbv||0)))-1;}
  }
  const A={name:'상시 적용',dps:0,tot:0,aa,aaT,per:{}};
  ms.forEach(m=>{A.per[m.k.id]={casts:m.casts,total:m.total};}); A.tot=ms.reduce((x,m)=>x+m.total,0)+aa; A.dps=A.tot/T;
@@ -560,8 +614,11 @@ function simEngine(T,aaps){ const run=fakeWin.__KKRun, inp=fakeWin.__KKInputs; i
   fakeWin.__N5=cfg.n5||5; const ev=[],lg=[]; run(order,members,T,null,ev,0,lg,null);
   const byName={}; ks.forEach(k=>byName[S[k.st]+'/'+k.n]=k);
   const R={name:'시뮬 엔진',per:{},aa:0,aaT:0,tot:0,dps:0}; let busy=0;
-  let sureU=-1; ev.forEach((e,i)=>{const k=byName[e[1]+'/'+e[2]]; if(!k) return; const l=lg[i]; const cr=critOf(k,Math.min(cfg.bt[k.id]||0,btMax(k)));
-   const tm=tgtInfo(k,Math.min(cfg.bt[k.id]||0,btMax(k))).mul; const d=(l[2]*critMul(cr,l[0]<sureU)*lwMul(k)+(cfg.dot?dotFor(k,Math.min(cfg.bt[k.id]||0,btMax(k)))*lwMul(k):0))*tm; if(cr.sure) sureU=l[1]+3;
+  const SF={}; ks.forEach(k=>{const st=Math.min(cfg.bt[k.id]||0,btMax(k)); SF[k.id]=effMulK(k,st,selfEf(k,st,engMod));});   // 엔진 창으로 안 다루는 효과는 자기 피해에만
+  const rU={}; let sureU=-1; ev.forEach((e,i)=>{const k=byName[e[1]+'/'+e[2]]; if(!k) return; const l=lg[i], KY=e[1]+'/'+e[2], st=Math.min(cfg.bt[k.id]||0,btMax(k)), cr0=critOf(k,st);
+   let rv=0; for(const q in rU) if(rU[q][0]>l[0]) rv+=rU[q][1]; const cr=wideOn('recv')?{sure:cr0.sure,recv:rv}:cr0;
+   const tm=tgtInfo(k,st).mul; const d=(l[2]*critMul(cr,l[0]<sureU)*lwMul(k)+(cfg.dot?dotFor(k,st)*lwMul(k):0))*SF[k.id]*tm; if(cr.sure) sureU=l[1]+3;
+   if(wideOn('recv')&&cr0.recv>0) rU[KY]=[l[1]+recvDur(k,st),cr0.recv];
    const r=R.per[k.id]||(R.per[k.id]={casts:0,total:0}); r.casts++; r.total+=d; busy+=Math.min(l[1],T)-l[0];});
   R.aaT=Math.max(0,T-busy); R.aa=R.aaT*aaps; R.tot=Object.values(R.per).reduce((x,r)=>x+r.total,0)+R.aa; R.dps=R.tot/T; return R;
  }catch(e){ console.error(e); return null; } }
