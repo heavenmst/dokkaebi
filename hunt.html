@@ -443,6 +443,7 @@ function renderMon(){
     return `<div class="sec" ${AR[s]?`id="sec-${AR[s].l}" style="border-left:4px solid ${AR[s].c}"`:''}><h3>${AR[s]?`<b class="ab" style="background:${AR[s].c}">${AR[s].l}</b>`:''}${s}${secPw(n,s)?`<span class="pwc">전투력 ${secPw(n,s)}</span>`:''}<span class="n">${sum}마리 · ${(P[s]||[]).length}묶음</span></h3>${mixbar(t)}${packs||L.map(([m,a,c])=>`<div class="mon"><i class="at a-${a}">${a}</i>${m.replace(n+' ','')}<span class="c">${c}</span></div>`).join('')}</div>`}).join('');
 }
 drawNeedIts();
+addEventListener('storage',e=>{if(e.key==='hc_atk'){try{const v=JSON.parse(e.newValue||'""');if(v!==$('atk').value){$('atk').value=v;render()}}catch(x){}}});   // 11/23 DPS 계산기 공격력과 연동
 ['cur','kpm','atk','def','basis','mypw','pwr'].forEach(id=>{$(id).oninput=render;$(id).onchange=render});
 $('cur').addEventListener('change',()=>{const z=Z[+$('cur').value],k=z.mk||z.z;if(M[k]){sv('sgl_'+k,-1);$('msel').value=k;renderMon()}});
 $('msel').onchange=()=>{SEL=null;renderMon()};
