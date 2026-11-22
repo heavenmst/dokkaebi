@@ -114,25 +114,27 @@ details.how{margin-top:6px}
     <div class="row"><label>현재 사냥터</label><select id="cur"></select></div>
     <div class="row big"><label>분당 처치</label><input id="kpm" type="number" min="1" step="1" value="90"></div>
     <div class="row"><label>이득 기준<small>「이 이상 잡으면 이득」을 무엇으로 비교할지</small></label><select id="basis"></select></div>
-    <div class="row"><label>최소 몬스터 투력<small>이보다 낮은 사냥터는 숨김</small></label><input id="minpw" type="number" step="10000" value="300000"></div><div class="row"><label>최대 몬스터 투력<small>이 투력 넘는 사냥터는 숨김</small></label><input id="maxpw" type="number" step="10000" value="700000"></div>
-    <div class="row"><label>내 기본 공격력<small>버프 없는 상태창 공격력 · 비우면 드랍 감소 확인 안 함</small></label><input id="atk" type="number" step="100" placeholder="예: 40800"></div>
-    <div class="kpi" id="atkinfo" style="margin-top:8px"></div>
-    <label class="opt"><input type="checkbox" id="applypen" checked> 드랍 감소를 효율에 반영</label>
+    <div class="row"><label>내 공격력</label><input id="atk" type="number" step="100" placeholder="예: 40800"></div>
+    <div class="row"><label>내 방어력</label><input id="def" type="number" step="100" placeholder="예: 12000"></div>
+  </div>
+  <div class="panel">
+    <h2>내 사냥터 <small style="font-weight:400;color:var(--dim);font-size:12px">오른쪽 「💾 저장」으로 쌓임 · 「📂 내 사냥터」로 비교표에 불러오기</small></h2>
+    <div id="myspots"></div>
   </div>
 </div>
 <div>
   <div class="panel">
     <h2>내 기록 비교 — 분당 · 시간당 획득량</h2>
     <div id="recs"></div>
-    <div style="margin:6px 0 10px"><button id="addrec">+ 기록 추가</button></div>
+    <div style="margin:6px 0 10px"><button id="addrec">+ 기록 추가</button> <button id="saverec" title="지금 비교표의 기록(사냥터·분당 처치)과 내 공격력·방어력을 왼쪽 「내 사냥터」에 저장">💾 저장</button> <button id="loadrec" title="왼쪽 「내 사냥터」에 저장한 기록을 비교표로 불러오기">📂 내 사냥터</button></div>
     <div id="cmpwarn"></div><div class="tbl" style="max-height:none"><table id="cmp"></table></div>
-    <details class="how"><summary>계산 방식 · 설명 보기</summary><ul><li><b>전래동화는 판이 둘</b>이에요. <b>[주간 비경]</b> = 주 5시간(수요일 05:00 충전) 동안의 드랍표, <b>[상시 비경]</b> = 그 5시간을 다 쓴 뒤의 드랍표. 이름은 같아도 재료 양이 크게 달라요(원님 고개 재료: 주간이 상시의 약 27배). 주간 원님 고개 숫자는 게임 데이터 + 실제 47,000마리 기록으로 확인.</li><li>기록마다 사냥터와 실제 분당 처치를 넣으면 게임 데이터 드랍률로 분당·시간당 평균 획득량을 계산해요.</li><li>첫 번째 기록 대비 차이를 %로 보여줘요(초록 = 더 많음). 드랍 감소 반영은 왼쪽 공격력·체크박스 설정을 따라요.</li><li>도술 요령서 = 12종(절명~제압) 합계, 원하는 1종은 이 값 ÷ 12. 단이 담긴 상자 = 열면 정기단 1~10개 무작위지만 실제 확률은 1개 21%·2개 50%·3개 25%·5개 3%·10개 1% (게임 데이터) → 1개 = 정기단 평균 2.21개로 환산. 단 합계 = 정기단 + 영기단×4 + 천지단×16 + 조화단×64 + 상자 환산. 강화 비법서 합계 = 장비 강화 <b>비법서</b>(책)를 전설 1장 기준으로 환산: 전설 + 영웅÷10 + 희귀÷100 + 일반÷1000 — 철·옷감·피혁 같은 강화 재료가 아니에요.</li><li>강화 재료는 사냥에서 희귀(철광석·옷감·피혁)·영웅(철 주괴·고급 옷감·강화 피혁)만 나오고 전설 재료(연마된 철 주괴 등)는 드랍이 없어요.</li><li>영기 수련 가속 = 1분·5분·10분권 드랍률 × 분을 모두 더한 값. 장비 아이템 = 청동 운검·흑암 단도·승려의 지팡이·바람물결 은선·물소뿔 흑각궁·군관의 전립·군관의 구군복·영기 흡수의 단화·청동 다리보호구·영기 흡수의 장갑·영혼술사의 홍색 각대 드랍 확률 합, 1개 = 요혼석 2개로 환산. 요혼석 시세를 넣으면 가치 합계에 들어가요.</li><li>만귀령패는 쉬움·보통·어려움이 서로 다른 아이템이라 따로 표시.</li></ul></details>
+    <details class="how"><summary>계산 방식 · 설명 보기</summary><ul><li><b>전래동화는 판이 둘</b>이에요. <b>[주간 비경]</b> = 주 5시간(수요일 05:00 충전) 동안의 드랍표, <b>[상시 비경]</b> = 그 5시간을 다 쓴 뒤의 드랍표. 이름은 같아도 재료 양이 크게 달라요(원님 고개 재료: 주간이 상시의 약 27배). 주간 원님 고개 숫자는 게임 데이터 + 실제 47,000마리 기록으로 확인.</li><li>기록마다 사냥터와 실제 분당 처치를 넣으면 게임 데이터 드랍률로 분당·시간당 평균 획득량을 계산해요.</li><li>첫 번째 기록 대비 차이를 %로 보여줘요(초록 = 더 많음).</li><li>도술 요령서 = 12종(절명~제압) 합계, 원하는 1종은 이 값 ÷ 12. 단이 담긴 상자 = 열면 정기단 1~10개 무작위지만 실제 확률은 1개 21%·2개 50%·3개 25%·5개 3%·10개 1% (게임 데이터) → 1개 = 정기단 평균 2.21개로 환산. 단 합계 = 정기단 + 영기단×4 + 천지단×16 + 조화단×64 + 상자 환산. 강화 비법서 합계 = 장비 강화 <b>비법서</b>(책)를 전설 1장 기준으로 환산: 전설 + 영웅÷10 + 희귀÷100 + 일반÷1000 — 철·옷감·피혁 같은 강화 재료가 아니에요.</li><li>강화 재료는 사냥에서 희귀(철광석·옷감·피혁)·영웅(철 주괴·고급 옷감·강화 피혁)만 나오고 전설 재료(연마된 철 주괴 등)는 드랍이 없어요.</li><li>영기 수련 가속 = 1분·5분·10분권 드랍률 × 분을 모두 더한 값. 장비 아이템 = 청동 운검·흑암 단도·승려의 지팡이·바람물결 은선·물소뿔 흑각궁·군관의 전립·군관의 구군복·영기 흡수의 단화·청동 다리보호구·영기 흡수의 장갑·영혼술사의 홍색 각대 드랍 확률 합, 1개 = 요혼석 2개로 환산. 요혼석 시세를 넣으면 가치 합계에 들어가요.</li><li>만귀령패는 쉬움·보통·어려움이 서로 다른 아이템이라 따로 표시.</li></ul></details>
   </div>
   <div class="panel">
     <h2>사냥터별 기준 처치 수</h2>
     <div class="kpi" id="kpi"></div>
-    <div class="tbl"><table><thead><tr><th class="l">사냥터</th><th class="l">구역</th><th>몬스터<br>투력</th><th>이 이상 잡으면<br>이득 (분당)<br><span style="font-weight:400" id="basisnote"></span></th><th class="l"></th><th>필요 공격력<br><span style="font-weight:400">기본</span></th><th>최대 공격력<br><span style="font-weight:400">넘으면 드랍 감소</span></th><th>부족 공격력<br><span style="font-weight:400" id="shnote">내 설정 기준</span></th><th>드랍</th><th><span id="basisth">기준</span><br><span style="font-weight:400">시간당</span></th><th></th></tr></thead><tbody id="tb"></tbody></table></div>
-    <details class="how"><summary>계산 방식 · 설명 보기</summary><ul><li>필요 공격력 = 드랍 감소 없이 사냥하려면 필요한 <b>기본(상태창) 공격력</b>. 최대 공격력 = 이보다 높으면 드랍 감소 · 부족 공격력 = 왼쪽에 넣은 내 기본 공격력으로 계산해서, 기본 공격력을 얼마나 더 올려야 하는지(초과면 얼마나 넘는지). 위쪽 한계(너무 세면 감소)는 줄에 마우스 올리면 보여요.</li><li>이 이상 잡으면 이득 = 왼쪽 「이득 기준」으로 고른 항목을 지금 사냥터만큼 얻으려면 분당 몇 마리 잡아야 하는지. 아이템을 엽전으로 바꾸는 가치 계산은 하지 않아요. 오른쪽 시간당 칸은 모든 사냥터를 지금 분당 처치 수로 잡는다고 보고 게임 데이터 드랍률로 계산(금색 = 이득 기준 항목). 엽전이 실제보다 많이 적게 나오면 드랍 감소를 의심해 보세요.</li><li>초록 = 지금보다 적게 잡아도 이득 · 노랑 = 비슷 · 빨강 = 더 많이 잡아야 함. 줄을 누르면 아래에 그 사냥터 몬스터가 나와요. 같은 사냥터 안 구역은 몬스터 레벨·전투력이 달라서 나눴어요(세부 지역은 마우스 올리면 보여요).</li><li>드랍 감소 규칙 = 깨비지지 사냥터 드랍 감소 계산기(11/6 반영) 실측값: 공격력이 「감소 없는 공격력」 아래 끝보다 낮으면 정기단·엽전·아이템 80% 감소, 위 끝보다 높으면 점점 줄어 최대 90% 감소. 깨비지지는 <b>버프 없는 공격력</b>으로 판정한다고 안내해요 — 버프 체크는 버프도 판정에 들어간다고 가정했을 때 값이에요.</li></ul></details>
+    <div class="tbl"><table><thead><tr><th class="l">사냥터</th><th class="l">구역</th><th>몬스터<br>투력</th><th>이 이상 잡으면<br>이득 (분당)<br><span style="font-weight:400" id="basisnote"></span></th><th class="l"></th><th><span id="basisth">기준</span><br><span style="font-weight:400">시간당</span></th><th></th></tr></thead><tbody id="tb"></tbody></table></div>
+    <details class="how"><summary>계산 방식 · 설명 보기</summary><ul><li>이 이상 잡으면 이득 = 왼쪽 「이득 기준」으로 고른 항목을 지금 사냥터만큼 얻으려면 분당 몇 마리 잡아야 하는지. 아이템을 엽전으로 바꾸는 가치 계산은 하지 않아요. 오른쪽 시간당 칸은 모든 사냥터를 지금 분당 처치 수로 잡는다고 보고 게임 데이터 드랍률로 계산(금색 = 이득 기준 항목).</li><li>초록 = 지금보다 적게 잡아도 이득 · 노랑 = 비슷 · 빨강 = 더 많이 잡아야 함. 줄을 누르면 아래에 그 사냥터 몬스터가 나와요. 같은 사냥터 안 구역은 몬스터 레벨·전투력이 달라서 나눴어요(세부 지역은 마우스 올리면 보여요).</li></ul></details>
   </div>
   <div class="panel">
     <h2>몬스터 속성 · 젠 위치 <select id="msel" style="width:auto;margin-left:8px"></select></h2>
@@ -169,8 +171,8 @@ const val=z=>amt(z,$('basis').value);
 const zn=[...new Set(Z.filter(z=>!z.dun).map(z=>z.z))].filter(n=>M[n]);
 zn.forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;$('msel').appendChild(o)});
 {const og=document.createElement('optgroup');og.label='── 비경 · 전래동화 ──';DUNN.filter(n=>M[n]).forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;og.appendChild(o)});$('msel').appendChild(og)}
-$('cur').value=ld('cur',Z.findIndex(z=>z.z==='역병의 부화장'));$('kpm').value=ld('kpm',90);$('maxpw').value=ld('maxpw',700000);$('minpw').value=ld('minpw',300000);$('atk').value=ld('atk','');
-$('applypen').checked=ld('applypen',true);
+$('cur').value=ld('cur',Z.findIndex(z=>z.z==='역병의 부화장'));$('kpm').value=ld('kpm',90);$('atk').value=ld('atk','');
+$('def').value=ld('def','');
 function fmt(n,d=0){return n.toLocaleString('ko-KR',{maximumFractionDigits:d,minimumFractionDigits:d})}
 // 드랍 감소 (깨비지지 drop-penalty 11/06 방식)
 const DT=DP.table,RU=DP.rule;
@@ -190,22 +192,18 @@ function dropRate(a,cp,nk){if(!(a>0))return 1;if(a<loAtk(cp))return nk?1:DP.hi.r
 function mult(){return 1}
 const FT=z=>/상시 비경|주간 비경/.test(z.z);
 function render(){
-  const ci=+$('cur').value,kpm=+$('kpm').value||0,maxpw=+$('maxpw').value||1e12,minpw=+$('minpw').value||0,base=+$('atk').value||0,mu=mult(),eff=base*mu,ap=$('applypen').checked;
-  sv('cur',ci);sv('kpm',kpm);sv('maxpw',maxpw);sv('minpw',minpw);sv('atk',$('atk').value);sv('applypen',ap);sv('basis',$('basis').value);
-  $('shnote').textContent=base?`내 ${fmt(base)}${mu>1?' ×'+mu.toFixed(3).replace(/0+$/,''):''} 기준`:'내 설정 기준';
-  $('atkinfo').innerHTML=base?`<div><b>${fmt(eff)}</b><span>판정 공격력</span></div><div><b>${fmt(toCp(eff))}</b><span>드랍 전투력</span></div>`:'';
-  const rate=z=>ap&&base?(FT(z)?1:dropRate(eff,z.pw,z.nk)):1;
+  const ci=+$('cur').value,kpm=+$('kpm').value||0;
+  sv('cur',ci);sv('kpm',kpm);sv('atk',$('atk').value);sv('def',$('def').value);sv('basis',$('basis').value);
+  const rate=z=>1;   // 11/23 사용자: 드랍 감소는 게임에서 보여 줘서 계산 뺌
   const cz=Z[ci],cv=val(cz)*rate(cz),perMin=cv*kpm;
   $('kpi').innerHTML=CATS.map(([k,n,d])=>`<div><b>${fmt(amt(cz,k)*rate(cz)*kpm*60,d)}</b><span>지금 시간당 ${n}${rate(cz)<1?' (드랍 감소 반영)':''}</span></div>`).join('');
-  const rows=Z.map((z,i)=>({z,i,rt:rate(z),v:val(z)*rate(z)})).filter(r=>(r.z.pw<=maxpw&&r.z.pw>=minpw)||r.i===ci);
+  const rows=Z.map((z,i)=>({z,i,rt:rate(z),v:val(z)*rate(z)}));
   const mx=Math.max(...rows.map(r=>perMin/r.v));
   $('basisnote').textContent=$('basis').selectedOptions[0].textContent+' 기준';
   $('tb').innerHTML=rows.map(({z,i,v,rt})=>{
-    const need=perMin/v,ratio=need/kpm,lo=z.nk||FT(z)?0:loAtk(z.pw),hi=FT(z)?Infinity:hiAtk(z.pw),r0=base&&!FT(z)?dropRate(eff,z.pw,z.nk):1;
+    const need=perMin/v,ratio=need/kpm;
     const cls=i===ci?'mid':ratio<0.95?'easy':ratio>1.05?'hard':'mid';
-    const st=!base?'<span style="color:var(--dim)">—</span>':r0>=1?'<span style="color:var(--good)">정상</span>':eff<lo?`<span style="color:var(--bad)">부족 ${Math.round(r0*100)}%</span>`:`<span style="color:var(--gold)">초과 ${Math.round(r0*100)}%</span>`;
-        const sh=!base?'<span style="color:var(--dim)">공격력 입력</span>':eff<lo?`<b style="color:var(--bad)">${fmt(Math.ceil(lo/mu-base))}</b> 부족`:eff>hi?`<b style="color:var(--gold)">${fmt(Math.ceil(base-hi/mu))}</b> 초과`:`<span style="color:var(--sub)">충분 (+${fmt(Math.floor(base-lo/mu))})</span>`;
-    return `<tr class="${i===ci?'cur':''} ${r0<1?'pen':''}" data-z="${z.mk||z.z}" data-i="${i}" title="${(z.secs||[]).join(', ')} · 감소 없는 공격력 ${fmt(lo)} ~ ${hi===Infinity?'제한 없음':fmt(hi)}"><td class="l">${z.z}${z.wk?'<span class="tag wk">주간 5시간</span>':z.al?'<span class="tag al">상시 · 5시간 소진 후</span>':z.dun?'<span class="tag dun">비경</span>':''}${z.nk?'<span class="tag nk">낙화</span>':''}${i===ci?'<span class="tag cur">지금</span>':''}</td><td class="l sec2">${z.lv||'—'}<small>${(z.secs||[]).join(', ')}</small></td><td>${fmt(z.pw)}</td><td><span class="need ${cls}">${fmt(need,1)}</span>마리</td><td class="l"><span class="bar" style="width:${Math.round(need/mx*90)}px"></span></td><td>${lo?'<b>'+fmt(lo)+'</b> 이상':'제한 없음'}</td><td>${hi===Infinity?'제한 없음':'<b>'+fmt(hi)+'</b> 이하'}</td><td>${sh}</td><td>${st}</td><td style="font-weight:700;background:var(--accbg)">${(()=>{const c=CATS.find(x=>x[0]===$('basis').value)||CATS[0];return fmt(amt(z,c[0])*rt*kpm*60,c[2])})()}</td><td><button class="zbtn" data-i="${i}">획득량</button></td></tr>`}).join('');
+    return `<tr class="${i===ci?'cur':''} " data-z="${z.mk||z.z}" data-i="${i}" title="${(z.secs||[]).join(', ')}"><td class="l">${z.z}${z.wk?'<span class="tag wk">주간 5시간</span>':z.al?'<span class="tag al">상시 · 5시간 소진 후</span>':z.dun?'<span class="tag dun">비경</span>':''}${z.nk?'<span class="tag nk">낙화</span>':''}${i===ci?'<span class="tag cur">지금</span>':''}</td><td class="l sec2">${z.lv||'—'}<small>${(z.secs||[]).join(', ')}</small></td><td>${fmt(z.pw)}</td><td><span class="need ${cls}">${fmt(need,1)}</span>마리</td><td class="l"><span class="bar" style="width:${Math.round(need/mx*90)}px"></span></td><td style="font-weight:700;background:var(--accbg)">${(()=>{const c=CATS.find(x=>x[0]===$('basis').value)||CATS[0];return fmt(amt(z,c[0])*rt*kpm*60,c[2])})()}</td><td><button class="zbtn" data-i="${i}">획득량</button></td></tr>`}).join('');
   $('basisth').textContent=($('basis').selectedOptions[0]||{}).textContent||'기준';
   $('tb').querySelectorAll('tr').forEach(tr=>tr.onclick=()=>zpop(+tr.dataset.i,rate(Z[+tr.dataset.i])));
   renderCmp();
@@ -220,7 +218,7 @@ const icoTag=k=>ICO[k]?`<img src="${ICO[k]}" alt="" style="width:22px;height:22p
 const per1=v=>{if(!(v>0))return '';const h=1/v;return `<small style="display:block;color:var(--dim)">약 ${fmt(h,h<10?1:0)}시간에 1개${h>=24?` (${(h/24).toFixed(1)}일)`:''}</small>`};
 let RECS=ld('recs',null);
 if(!RECS){const a=Z.findIndex(z=>z.z==='역병의 부화장'),b=Z.findIndex(z=>z.z==='마을 어귀'&&z.lv==='Lv.102');RECS=[{z:a,k:90},{z:b,k:70}]}
-function curRate(z){const base=+$('atk').value||0;return $('applypen').checked&&base?(FT(z)?1:dropRate(base*mult(),z.pw,z.nk)):1}
+function curRate(z){return 1}
 // 11/19: 문서 전체에 막는 휠 리스너를 달면 브라우저가 모든 스크롤을 JS 처리 뒤로 미뤄 버벅임(휠 처리 12ms→6ms 측정) → 목록 칸에만
 function guardSel(r){(r||document).querySelectorAll('select').forEach(s=>{if(s._wg)return;s._wg=1;s.addEventListener('wheel',e=>{e.preventDefault();window.scrollBy(0,e.deltaY)},{passive:false})})}
 function showMon(i){const z=Z[i],k=z.mk||z.z;if(!M[k])return;$('msel').value=k;SEL={k,secs:z.secs||[],lab:key(z)+' ('+fmt(z.pw)+')'};renderMon();$('msel').closest('.panel').scrollIntoView({behavior:'smooth',block:'start'})}
@@ -275,8 +273,7 @@ function renderCmp(){
 }
 function renderAll(){
   const k=+$('allk').value||0;sv('allk',k);
-  const minpw=+$('minpw').value||0,maxpw=+$('maxpw').value||1e12;
-  const rows=Z.filter(z=>z.pw>=minpw&&z.pw<=maxpw);
+  const rows=Z.slice();
   if(!$('allg').options.length){$('allg').innerHTML=GI.map(([g,n])=>`<option value="${g}">${n}</option>`).join('');$('allg').value=ld('allg','엽전');$('allg').onchange=renderAll}
   const G=GI.find(x=>x[0]===$('allg').value)||GI[0];sv('allg',G[0]);
   let h=`<thead><tr><th class="l">사냥터</th><th class="l">구역</th><th>몬스터 투력</th><th>${G[1]}<br><span style="font-weight:400">시간당</span></th><th>드랍</th><th></th></tr></thead><tbody>`;
@@ -285,6 +282,19 @@ function renderAll(){
   $('allt').innerHTML=h+'</tbody>';
   $('allt').querySelectorAll('tr[data-ai]').forEach(tr=>tr.onclick=()=>{const z=Z[+tr.dataset.ai];zpop(+tr.dataset.ai,curRate(z),k)});
 }
+// 11/23 사용자: 저장 = 비교표 기록을 왼쪽 「내 사냥터」에 쌓기(같은 사냥터·구역은 새 값으로) · 내 사냥터 = 그 목록을 비교표로
+let MY=ld('myspots',[]);
+const zIdx=k=>Z.findIndex(z=>key(z)===k);
+function renderMy(){sv('myspots',MY);
+  $('myspots').innerHTML=MY.length?MY.map((m,i)=>`<div class="myit" style="display:flex;align-items:center;gap:8px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;margin:4px 0;background:#FAFBFC"><span style="flex:1">${icoTag('엽전')}<b>${m.key}</b><small style="display:block;color:var(--sub)">분당 ${m.k}마리${m.atk?' · 공 '+fmt(+m.atk):''}${m.def?' · 방 '+fmt(+m.def):''} · ${m.at}</small></span><button data-myx="${i}" title="지우기" style="padding:2px 8px">✕</button></div>`).join('')
+   :'<div style="color:var(--dim);font-size:13px">아직 없음 — 오른쪽 비교표에서 기록을 만들고 「💾 저장」을 누르세요</div>';}
+$('myspots').onclick=e=>{const b=e.target.closest('[data-myx]');if(!b)return;MY.splice(+b.dataset.myx,1);renderMy()};
+$('saverec').onclick=()=>{const d=new Date(),at=`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  RECS.forEach(r=>{const z=Z[r.z];if(!z)return;const e={key:key(z),k:r.k,atk:$('atk').value,def:$('def').value,at};const o=MY.findIndex(m=>m.key===e.key);if(o>=0)MY[o]=e;else MY.push(e)});
+  renderMy();const b=$('saverec');b.textContent='✔ 저장됨';setTimeout(()=>b.textContent='💾 저장',1200)};
+$('loadrec').onclick=()=>{const L=MY.map(m=>({z:zIdx(m.key),k:m.k})).filter(r=>r.z>=0);if(!L.length)return;RECS=L;
+  const last=MY[MY.length-1];if(last.atk)$('atk').value=last.atk;if(last.def)$('def').value=last.def;renderRecs();render()};
+renderMy();
 $('addrec').onclick=()=>{RECS.push({z:+$('cur').value,k:+$('kpm').value||60});renderRecs()};
 $('allk').value=ld('allk',80);$('allk').oninput=renderAll;
 function drawMap(n,P){
@@ -391,7 +401,7 @@ function renderMon(){
       return `<div class="pk" id="pk-${key}" onclick="this.classList.toggle('open');selPack('${key}',0)"><div class="h">${AR[s]?`<b class="ab" style="background:${AR[s].c}">${AR[s].l}${i+1}</b>`:`<b>묶음 ${i+1}</b>`}${secPw(n,s)?`<span class="pwc">${secPw(n,s)}</span>`:''}${deepChip(n,key)}<i class="at a-${ma}">${ma}</i>${Math.round(mc/k*100)}%<span class="c">${k}마리 ▾</span></div>${sprLine(n,key)}${mixbar(at)}<div class="d"><div class="cnt">${E.map(([a,c])=>`<i class="at a-${a}">${a}</i> ${c}`).join(' &nbsp;')}</div>${ms.map(([m,a,c])=>`<div class="mon"><i class="at a-${a}">${a}</i>${m.replace(n+' ','')}<span class="c">${c}</span></div>`).join('')}</div></div>`}).join('');
     return `<div class="sec" ${AR[s]?`id="sec-${AR[s].l}" style="border-left:4px solid ${AR[s].c}"`:''}><h3>${AR[s]?`<b class="ab" style="background:${AR[s].c}">${AR[s].l}</b>`:''}${s}${secPw(n,s)?`<span class="pwc">전투력 ${secPw(n,s)}</span>`:''}<span class="n">${sum}마리 · ${(P[s]||[]).length}묶음</span></h3>${mixbar(t)}${packs||L.map(([m,a,c])=>`<div class="mon"><i class="at a-${a}">${a}</i>${m.replace(n+' ','')}<span class="c">${c}</span></div>`).join('')}</div>`}).join('');
 }
-['cur','kpm','maxpw','minpw','atk','applypen','basis'].forEach(id=>{$(id).oninput=render;$(id).onchange=render});
+['cur','kpm','atk','def','basis'].forEach(id=>{$(id).oninput=render;$(id).onchange=render});
 $('cur').addEventListener('change',()=>{const z=Z[+$('cur').value],k=z.mk||z.z;if(M[k]){sv('sgl_'+k,-1);$('msel').value=k;renderMon()}});
 $('msel').onchange=()=>{SEL=null;renderMon()};
 function dunBtns(){const c=$('msel').value;$('dunb').innerHTML='<b>🏯 비경 · 전래동화</b>'+DUNN.filter(n=>M[n]).map(n=>`<button class="${n===c?'on':''}" data-n="${n}">${n.replace(/^\[(상시 비경|비경|전래동화)\] ?/,m=>m.includes('상시')?'상시 ':m.includes('전래')?'전래 ':'')}</button>`).join('');$('dunb').querySelectorAll('button').forEach(b=>b.onclick=()=>{SEL=null;$('msel').value=b.dataset.n;renderMon()})}
