@@ -222,7 +222,6 @@ function renderNeed(ci,kpm){const cz=Z[ci],my=+$('mypw').value||0,R=$('pwr').val
     +`<div style="color:var(--dim);font-size:12px;margin-top:6px">색 = 기준 분당 처치 수보다 적게(초록)/비슷(노랑)/많이(빨강) 잡아야 함 · 줄 누르면 시간당 획득량</div>`;
   $('needbox').querySelectorAll('tr[data-i]').forEach(tr=>tr.onclick=()=>zpop(+tr.dataset.i,1));}
 $('needits').addEventListener('change',e=>{const k=e.target.dataset.nk;if(!k)return;NEED_SEL=NEED_ALL.map(x=>x[0]).filter(x=>x===k?e.target.checked:NEED_SEL.includes(x));sv('needsel',NEED_SEL);drawNeedIts();render()});
-drawNeedIts();
 // 기록 비교
 const SHORT={'단상자정기단':'상자→정기단','단합계':'단 합계','재료합':'비법서 합계','전설장비강화비법':'전설 비법서','전설재료':'전설 재료','장비':'장비','요혼석':'요혼석','도술요령서':'요령서','가속분':'수련 가속(분)','만귀령패쉬움':'만귀 쉬움','만귀령패보통':'만귀 보통','만귀령패어려움':'만귀 어려움'};
 // 11/21 사용자: 엽전→요혼석→단 순서, 아이콘, 종류별 색 묶음, 전부 0인 줄 숨김, 조화단도 몇 시간에 1개
@@ -443,6 +442,7 @@ function renderMon(){
       return `<div class="pk" id="pk-${key}" onclick="this.classList.toggle('open');selPack('${key}',0)"><div class="h">${AR[s]?`<b class="ab" style="background:${AR[s].c}">${AR[s].l}${i+1}</b>`:`<b>묶음 ${i+1}</b>`}${secPw(n,s)?`<span class="pwc">${secPw(n,s)}</span>`:''}${deepChip(n,key)}<i class="at a-${ma}">${ma}</i>${Math.round(mc/k*100)}%<span class="c">${k}마리 ▾</span></div>${sprLine(n,key)}${mixbar(at)}<div class="d"><div class="cnt">${E.map(([a,c])=>`<i class="at a-${a}">${a}</i> ${c}`).join(' &nbsp;')}</div>${ms.map(([m,a,c])=>`<div class="mon"><i class="at a-${a}">${a}</i>${m.replace(n+' ','')}<span class="c">${c}</span></div>`).join('')}</div></div>`}).join('');
     return `<div class="sec" ${AR[s]?`id="sec-${AR[s].l}" style="border-left:4px solid ${AR[s].c}"`:''}><h3>${AR[s]?`<b class="ab" style="background:${AR[s].c}">${AR[s].l}</b>`:''}${s}${secPw(n,s)?`<span class="pwc">전투력 ${secPw(n,s)}</span>`:''}<span class="n">${sum}마리 · ${(P[s]||[]).length}묶음</span></h3>${mixbar(t)}${packs||L.map(([m,a,c])=>`<div class="mon"><i class="at a-${a}">${a}</i>${m.replace(n+' ','')}<span class="c">${c}</span></div>`).join('')}</div>`}).join('');
 }
+drawNeedIts();
 ['cur','kpm','atk','def','basis','mypw','pwr'].forEach(id=>{$(id).oninput=render;$(id).onchange=render});
 $('cur').addEventListener('change',()=>{const z=Z[+$('cur').value],k=z.mk||z.z;if(M[k]){sv('sgl_'+k,-1);$('msel').value=k;renderMon()}});
 $('msel').onchange=()=>{SEL=null;renderMon()};
