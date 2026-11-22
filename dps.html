@@ -129,8 +129,7 @@ td{border-top:1px solid var(--line)}tr:nth-child(even) td{background:#FAFBFC}
     <label class="opt"><input type="checkbox" id="oCharge" checked>차지 시간 포함 (차지 끝난 뒤 쿨 시작)</label>
     <input type="checkbox" id="oDot" checked style="display:none"><div class="sub" style="margin:0 0 6px 0">지속 피해(화상·출혈): 필드보스·레이드 = 도술 지속시간 끝까지 · 개인 = <input id="oDotS" type="number" min="0" max="20" step="0.5" style="width:44px">초 (×맞은 인원)</div>
     <input type="checkbox" id="oWBuf" style="display:none">
-    <label class="opt"><input type="checkbox" id="oWDeb">내 디버프 덱 전체 적용 <span class="tag" style="margin:0">받는 피해·받는 치명 피해 증가</span></label>
-    <div class="sub" style="margin:0 0 4px 26px">체크 = 덱 도술이 거는 효과를 덱 전체 피해에 넣음. 계속 걸려 있지 않으면 지금 덱을 1시간 돌려 본 가동률만큼만 (순위표 = 평균, 덱 시뮬 = 시간대별 그대로). 해제 = 건 도술 자기 피해에만.</div>
+    <input type="checkbox" id="oWDeb" style="display:none"><div class="sub" style="margin:0 0 4px 0"><b>DPS 순위</b> = 도술 하나만 봄: 자기가 거는 버프·디버프는 자기 피해에만, 다른 도술이 걸어 줘야 하는 연계(예: 대검 찍기 정밀)는 안 넣음 (필드보스는 전부 걸린 상태라 연계 켬). <b>덱 시뮬</b> = 덱 도술 버프·디버프가 서로에게 들어감.</div>
     <div id="wSum" class="sub" style="margin:0 0 6px 26px"></div>
     <details style="margin:0 0 6px 0"><summary class="sub" style="cursor:pointer">세부 — 효과 하나씩 빼기 · 레이드용 깡딜</summary>
     <label class="opt"><input type="checkbox" id="oNoDeb">적 디버프 빼기 <span class="tag" style="margin:0" title="방어력 감소·받는 피해 증가·받는 치명 피해를 계산에서 뺌 — 레이드는 남이 걸어주니 깡딜로 비교. 내 버프(공격력·주는 피해 증가)는 그대로">레이드용 깡딜</span></label>
@@ -223,7 +222,8 @@ xWrap(K,'motionInputs');xWrap(fakeWin,'__KKInputs');fakeWin.__XM=XM;
 const OFFK=lab=>/^공격력/.test(lab)?'atk':/^주는 피해/.test(lab)?'dmg':/^받는 치명/.test(lab)?'recv':/^받는 피해/.test(lab)?'amp':/^방어력/.test(lab)?'def':'etc';
 const isOff=(key,kind)=>!!(cfg.off&&cfg.off[key+':'+kind]);
 // 엔진 쪽 끄기: 효과별 빼기 + 덱 전체 적용 해제(그 종류는 자기 피해에만 → 엔진 창은 끔)
-function wideOn(kd){return (kd==='amp'||kd==='recv')?(!!cfg.wdeb&&!cfg.nodeb):(kd==='atk'||kd==='dmg')?!!cfg.wbuf:false;}
+// 11/23 사용자: DPS 순위 = 그 도술 혼자(자기 버프·디버프는 자기 피해에만, 다른 도술 필요한 연계 X) · 덱 전체 적용은 덱 시뮬에서만
+function wideOn(kd){if(window.__RANKCTX) return false; return (kd==='amp'||kd==='recv')?(!!cfg.wdeb&&!cfg.nodeb):(kd==='atk'||kd==='dmg')?!!cfg.wbuf:false;}
 fakeWin.__OFF=(key,kind)=>isOff(key,kind)||((kind==='amp'||kind==='atk'||kind==='dmg')&&!wideOn(kind));
 // 엔진이 시간대별로 다루는 효과 (나머지는 덱 전체 모드여도 자기 피해에만)
 const ENG_MOD=(()=>{const g=nm=>{const m=ENGINE_SRC3.match(new RegExp('var '+nm+' = \\{([^}]*)\\}'));return m?(m[1].match(/'[^']+'/g)||[]).map(x=>x.slice(1,-1)).filter(x=>x.includes('/')):[];};
@@ -301,7 +301,7 @@ $('bt6').onclick=()=>{cfg.bt={};D.skills.forEach(k=>{if(canBT(k))cfg.bt[k.id]=Ma
 // 옵션
 if(cfg.dotS==null)cfg.dotS=2; $('oDotS').value=cfg.dotS; $('oDotS').oninput=e=>{cfg.dotS=parseFloat(e.target.value);save();calc();};
 cfg.wbuf=true;cfg.dot=true;   // 11/23 사용자: 체크 칸 뺌 (버프 덱 전체 적용은 켠 상태 고정)
- if(cfg.wdeb==null)cfg.wdeb=true;
+ cfg.wdeb=true;
 [['oRaid','raid'],['oWBuf','wbuf'],['oWDeb','wdeb'],['oNoDeb','nodeb'],['oCharge','charge'],['oDot','dot'],['oUlt','ult']].forEach(([id,k])=>{$(id).checked=cfg[k];$(id).onchange=e=>{cfg[k]=e.target.checked;save();calc();};});
 $('oAA').checked=cfg.aa;$('oAA').onchange=e=>{cfg.aa=e.target.checked;save();calc();};
 $('oAAp').value=cfg.aap;$('oAAh').value=cfg.aah;$('oWep').value=cfg.wep||'far';
@@ -489,7 +489,7 @@ function sxOn(s,op){return op.includes(s)&&SX[s][1];}   // 11/23 사용자: 신�
 function drawSx(){const op=opened();
  $('sxBox').innerHTML=op.length?`<div class="sub">신식 개방: <b>${op.join(', ')}</b> — 덱 조건이 맞아 자동 적용</div><div class="sx">`+op.map(s=>`<span style="margin-right:12px"><span class="chip" style="background:${COL[S.indexOf(s)]}">${s}</span> ${SX[s][0]}${SX[s][1]?'':' <span class="tag">(쿨 있는 효과라 상시 적용 안 함)</span>'}</span>`).join('')+'</div>'
   :`<div class="warn">신식 미개방 — 궁극기를 고르고, 그 궁극기 스타일 도술을 3개 이상 넣으면 열려요</div>`;}
-function deckChanged(){save();drawSlots();drawUlt();drawPal();drawSx();simDeck();_calc();}
+function deckChanged(){save();drawSlots();drawUlt();drawPal();drawSx();simDeck();window.__RANKCTX=true;try{_calc();}finally{window.__RANKCTX=false;}}
 // 덱에 넣기: 일반 도술 = 앞 빈 칸부터, 궁극기 = 있던 궁 자리 바꾸기(없으면 앞 빈 칸)
 function addToDeck(id){ const k=SK(id); if(!k) return; if(cfg.deck.includes(id)) return;
  if(k.u){ const ui=cfg.deck.findIndex(x=>x!=null&&SK(x).u); if(ui>=0){cfg.deck[ui]=id;deckChanged();return;} }
@@ -729,6 +729,6 @@ function drawMode(){document.querySelectorAll('input[name=dmode]').forEach(r=>r.
   solo:'개인 = 일반 사냥. 디버프·표식은 내 덱 도술이 거는 것만, 보스 전용 효과(연타 격노 보스 피해 등) 끔'}[cfg.dmode];}
 $('modeBox').addEventListener('change',e=>{if(e.target.name!=='dmode')return;cfg.dmode=e.target.value;applyMode();save();calc();});
 applyMode();drawMode();
-const _calc=calc;calc=function(){_calc();drawOff();drawSx1();drawSlots();drawUlt();drawPal();drawSx();simDeck();};
+const _calc=calc;calc=function(){window.__RANKCTX=true;try{_calc();}finally{window.__RANKCTX=false;}drawOff();drawSx1();drawSlots();drawUlt();drawPal();drawSx();simDeck();};
 drawSlots();drawUlt();drawPal();drawSx();simDeck();drawSx1();drawOff();
 </script></body></html>
