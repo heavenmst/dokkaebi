@@ -26,6 +26,7 @@ iframe.on{display:block}
   <a href="#hunt" data-t="hunt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 20l6-12 4 7 3-4 5 9z"/><circle cx="17" cy="5" r="2"/></svg>사냥터 효율</a>
   <a href="#dps" data-t="dps"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.5 3.5l6 6L10 20l-6 0 0-6z"/><path d="M12 6l6 6"/></svg>도술 DPS</a>
   <a href="#growth" data-t="growth"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>성장 목표</a>
+  <a href="#salvage" data-t="salvage"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></svg>분해 계산</a>
  </nav>
  <div class="note">게임 클라이언트 표 기준 · 입력값은 내 브라우저에만 저장</div>
 </div></header>
@@ -33,16 +34,17 @@ iframe.on{display:block}
  <iframe id="f-hunt" data-src="hunt.html" title="사냥터 효율 계산기"></iframe>
  <iframe id="f-dps" data-src="dps.html" title="도술 DPS 계산기"></iframe>
  <iframe id="f-growth" data-src="growth.html" title="성장 목표 계산기"></iframe>
+ <iframe id="f-salvage" data-src="salvage.html" title="분해 계산기"></iframe>
 </main>
 <script>
-const TABS=['hunt','dps','growth'];
+const TABS=['hunt','dps','growth','salvage'];
 function show(){
  let t=(location.hash||'').slice(1); if(!TABS.includes(t)) t='hunt';
  TABS.forEach(k=>{const f=document.getElementById('f-'+k), on=k===t;
   if(on&&!f.src) f.src=f.dataset.src;   // 처음 누를 때만 불러오고 이후엔 입력 상태 유지
   f.classList.toggle('on',on);
   document.querySelector(`nav a[data-t="${k}"]`).classList.toggle('on',on);});
- document.title={hunt:'사냥터 효율',dps:'도술 DPS',growth:'성장 목표'}[t]+' · 도깨비';
+ document.title={hunt:'사냥터 효율',dps:'도술 DPS',growth:'성장 목표',salvage:'분해 계산'}[t]+' · 도깨비';
 }
 addEventListener('hashchange',show); show();
 </script>
