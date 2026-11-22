@@ -127,8 +127,8 @@ td{border-top:1px solid var(--line)}tr:nth-child(even) td{background:#FAFBFC}
     <div style="display:flex;gap:6px;margin-top:8px"><button class="btn" id="all0">전부 0</button><button class="btn" id="all50">전부 50</button></div></div>
   <div class="panel"><h2>계산 옵션</h2>
     <label class="opt"><input type="checkbox" id="oCharge" checked>차지 시간 포함 (차지 끝난 뒤 쿨 시작)</label>
-    <label class="opt"><input type="checkbox" id="oDot" checked>지속 피해 포함 (화상·출혈: 1명=쿨만큼, 2명↑=<input id="oDotS" type="number" min="0" max="20" step="0.5" style="width:40px">초×인원)</label>
-    <label class="opt"><input type="checkbox" id="oWBuf">내 버프 덱 전체 적용 <span class="tag" style="margin:0">공격력·주는 피해 증가</span></label>
+    <input type="checkbox" id="oDot" checked style="display:none"><div class="sub" style="margin:0 0 6px 0">지속 피해(화상·출혈): 필드보스·레이드 = 도술 지속시간 끝까지 · 개인 = <input id="oDotS" type="number" min="0" max="20" step="0.5" style="width:44px">초 (×맞은 인원)</div>
+    <input type="checkbox" id="oWBuf" style="display:none">
     <label class="opt"><input type="checkbox" id="oWDeb">내 디버프 덱 전체 적용 <span class="tag" style="margin:0">받는 피해·받는 치명 피해 증가</span></label>
     <div class="sub" style="margin:0 0 4px 26px">체크 = 덱 도술이 거는 효과를 덱 전체 피해에 넣음. 계속 걸려 있지 않으면 지금 덱을 1시간 돌려 본 가동률만큼만 (순위표 = 평균, 덱 시뮬 = 시간대별 그대로). 해제 = 건 도술 자기 피해에만.</div>
     <div id="wSum" class="sub" style="margin:0 0 6px 26px"></div>
@@ -300,7 +300,8 @@ $('btL6').onclick=()=>{cfg.bt={};D.skills.forEach(k=>{if(isLeg(k)&&canBT(k))cfg.
 $('bt6').onclick=()=>{cfg.bt={};D.skills.forEach(k=>{if(canBT(k))cfg.bt[k.id]=Math.min(6,btMax(k));});drawBT();save();calc();};
 // 옵션
 if(cfg.dotS==null)cfg.dotS=2; $('oDotS').value=cfg.dotS; $('oDotS').oninput=e=>{cfg.dotS=parseFloat(e.target.value);save();calc();};
-if(cfg.wbuf==null)cfg.wbuf=true; if(cfg.wdeb==null)cfg.wdeb=true;
+cfg.wbuf=true;cfg.dot=true;   // 11/23 사용자: 체크 칸 뺌 (버프 덱 전체 적용은 켠 상태 고정)
+ if(cfg.wdeb==null)cfg.wdeb=true;
 [['oRaid','raid'],['oWBuf','wbuf'],['oWDeb','wdeb'],['oNoDeb','nodeb'],['oCharge','charge'],['oDot','dot'],['oUlt','ult']].forEach(([id,k])=>{$(id).checked=cfg[k];$(id).onchange=e=>{cfg[k]=e.target.checked;save();calc();};});
 $('oAA').checked=cfg.aa;$('oAA').onchange=e=>{cfg.aa=e.target.checked;save();calc();};
 $('oAAp').value=cfg.aap;$('oAAh').value=cfg.aah;$('oWep').value=cfg.wep||'far';
@@ -346,7 +347,8 @@ function dotOf(k,cap){if(cap==null||!isFinite(cap))cap=1e9;let t=0;(k.hit||[]).f
 // 11/11 사용자: 1명 = 지속시간과 쿨 중 짧은 쪽 / 2명 이상 = 몹이 금방 죽어 2초만 × 맞은 인원 (인원 곱은 ti.mul)
 // 덱 시뮬용: 대상 2명 이상 = dotS()초, 1명 = 그 도술 쿨(+차지)까지
 function dotFor(k,bt){return dotFor0(k,bt)*XM();}
-function dotFor0(k,bt){const ti=tgtInfo(k,bt); if(ti.hit>1) return dotOf(k,dotS()); let cd=1e9; try{const v=K.motionInputs(k,cfg.lv,bt,CHAIN_ON); cd=v.cd+(cfg.charge?(k.num.cm||0)/1000:0);}catch(e){} return dotOf(k,cd);}
+// 11/23 사용자: 필드보스·레이드 = 지속시간 끝까지, 개인 = dotS초(기본 2)
+function dotFor0(k,bt){if(cfg.dmode!=='solo') return dotOf(k,1e9); return dotOf(k,dotS()); const ti=tgtInfo(k,bt); if(ti.hit>1) return dotOf(k,dotS()); let cd=1e9; try{const v=K.motionInputs(k,cfg.lv,bt,CHAIN_ON); cd=v.cd+(cfg.charge?(k.num.cm||0)/1000:0);}catch(e){} return dotOf(k,cd);}
 function dotS(){const v=parseFloat(cfg.dotS);return isFinite(v)&&v>=0?v:2;}
 
 // 피해에 영향 주는 버프·디버프 (도술 효과 문구에서 읽음). 보호막 제거·이동 속도 같은 건 제외
@@ -421,7 +423,7 @@ var calc=function(){ if(!K){$('rows').innerHTML='<tr><td colspan="7">계산 엔�
   const rows=[]; const aaps=cfg.aap*cfg.aah*critE(0)*XM(); $('oAAs').textContent=aaps.toFixed(1);
   D.skills.forEach(k=>{ if(!k.num||!(k.num.total>0||CHAIN_ON.includes(k.id)))return; if(!cfg.on[S[k.st]])return; if(k.u&&!cfg.ult)return;
     const st=Math.min(cfg.bt[k.id]||0,btMax(k)); const ti=tgtInfo(k,st); if((+cfg.tg||1)>1&&!(tgtCap(k,st)>1))return; let v=null; try{v=K.motionInputs(k,cfg.lv,st,CHAIN_ON);}catch(e){} if(!v)return;
-    const dotCap=ti.hit>1?dotS():(v.cd+(cfg.charge?(k.num.cm||0)/1000:0)), dot=cfg.dot?dotOf(k,dotCap):0, ch=cfg.charge?(k.num.cm||0)/1000:0, cyc=Math.max(v.cd+ch,v.motion);
+    const dotCap=cfg.dmode!=='solo'?1e9:dotS(), dot=dotOf(k,dotCap), ch=cfg.charge?(k.num.cm||0)/1000:0, cyc=Math.max(v.cd+ch,v.motion);
     const chT=(k.num.cm||0)/1000, aaLoss=cfg.aa?chT*aaps:0;   // 11/01 사용자: 모션은 빼고 차지 시간 동안 못 나간 평타만
     const W=deckW(), inD=!!(W&&W.ids.has(k.id));
     const ef=W?selfEf(k,st,(key,kd)=>inD&&engMod(key,kd)):effOf(k,st), cr=critOf(k,st); let em=effMulK(k,st,ef), crm=critMul(cr,false);
