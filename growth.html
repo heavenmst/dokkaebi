@@ -200,16 +200,18 @@ function equipCost(g){
   let M=L; while(M<g.to && D.lb_from.indexOf(M)<0) M++;
   const book=e[M]-e[L]; add({t:`${L}→${M} 강화`,book,coin:book*cpb,note:`강화서 1개당 ${fmt(cpb)} 엽전`}); L=M;
  }
- for(let s=g.trCur+1;s<=g.trTo;s++){ const c=D.tr[G][g.part][s-1], tr=D.tr_try[G][s-1], k=tr.tries;
+ for(let s=g.trCur+1;s<=g.trTo;s++){ const c=D.tr[G][g.part][s-1], tr=D.tr_try[G][s-1], k=paidTries(tr.p,tr.pity);
   add({t:`돌파 ${s}단계`,prob:1,coin:c.coin*k,yh:c.yh*k,book:c.book*k,cheon:c.cheon*k,
-       note:`성공 ${Math.round(tr.p*100)}% · 천장 ${tr.pity??'-'}회 실패 후 확정 · 기대 ${fmt(k,3)}회${tr.pity!=null?` · 운 나쁘면 최대 ${tr.pity+1}회`:''} (1회: 엽전 ${man(c.coin)}, 요혼석 ${c.yh}, 천요석 ${c.cheon}, 강화서 ${c.book})`}); }
+       note:`성공 ${Math.round(tr.p*100)}% · ${tr.pity!=null?`${tr.pity}회 실패하면 다음은 무료 확정(돌파 보장)`:''} · 돈 내는 시도 평균 ${fmt(k,3)}회${tr.pity!=null?` · 운 나쁘면 최대 ${tr.pity}회 + 무료 1회`:''} (1회: 엽전 ${man(c.coin)}, 요혼석 ${c.yh}, 천요석 ${c.cheon}, 강화서 ${c.book})`}); }
  return {label:`전설 ${PARTK[g.part]} ${g.cur}→${g.to}강`+(g.trTo>g.trCur?` · 돌파 ${g.trCur}→${g.trTo}`:''),...r,segs};
 }
+// 11/23 돌파 보장: 천장(실패 N회) 다음 회차는 재료 없이 무료 → 돈 내는 시도 = (1-(1-p)^N)/p
+const paidTries=(p,n)=>n==null?1/p:(1-Math.pow(1-p,n))/p;
 function skillTrCost(g){
  const rows=D.skill.Legendary, segs=[]; let r={book:0,coin:0,yh:0,cheon:0,extra:0};
- for(let s=g.trCur+1;s<=g.trTo;s++){ const c=rows[s-1], k=c.tries;
+ for(let s=g.trCur+1;s<=g.trTo;s++){ const c=rows[s-1], k=paidTries(c.p,c.pity);
   const sg={t:`돌파 ${s}단계`,prob:1,coin:c.coin*k,yh:c.yh*k,cheon:c.cheon*k,extra:(c.extra7||0)*k,
-   note:`성공 ${Math.round(c.p*100)}% · 천장 ${c.pity??'-'} · 기대 ${fmt(k,3)}회${c.pity!=null?` · 운 나쁘면 최대 ${c.pity+1}회`:''} (1회: 엽전 ${man(c.coin)}, 요혼석 ${c.yh}, 천요석 ${c.cheon}, 미확인 재료 ${c.extra7??0})`};
+   note:`성공 ${Math.round(c.p*100)}% · ${c.pity!=null?`${c.pity}회 실패하면 다음은 무료 확정(돌파 보장)`:''} · 돈 내는 시도 평균 ${fmt(k,3)}회${c.pity!=null?` · 운 나쁘면 최대 ${c.pity}회 + 무료 1회`:''} (1회: 엽전 ${man(c.coin)}, 요혼석 ${c.yh}, 천요석 ${c.cheon}, 미확인 재료 ${c.extra7??0})`};
   segs.push(sg); r.coin+=sg.coin; r.yh+=sg.yh; r.cheon+=sg.cheon; r.extra+=sg.extra; }
  return {label:`도술 돌파 ${g.memo?'['+g.memo+'] ':''}${g.trCur}→${g.trTo} (전설·특별)`,...r,segs};
 }
@@ -337,7 +339,7 @@ function run(){
  costs.forEach(c=>{ h+=`<tr><td><details><summary>${c.label}${c.segs.some(x=>x.prob)?' <span class="tag est" title="돌파는 성공 확률이 있어 평균으로 계산한 기대 비용이에요. 운이 좋으면 덜, 나쁘면 천장까지 더 들 수 있어요">확률 · 기대 비용</span>':''}</summary><table>${c.segs.map(s=>`<tr><td>${s.t}${s.prob?' <span class="tag est">기대값</span>':''}${s.note?` <span class="dim">${s.note}</span>`:''}</td><td>${s.book?fmt(s.book,1):''}</td><td>${s.yh?fmt(s.yh,1):''}</td><td>${s.coin?man(s.coin):''}</td><td>${s.cheon?fmt(s.cheon,1):''}</td><td>${s.skbook?'요령서 '+fmt(s.skbook,1):''}${s.extra?'칸7 '+fmt(s.extra,1):''}</td></tr>`).join('')}</table></details></td>
    <td>${fmt(c.book,1)}</td><td>${fmt(c.yh,1)}</td><td>${man(c.coin)}</td><td>${fmt(c.cheon,1)}</td><td>${c.skbook?`${c.style} 요령서 ${fmt(c.skbook,1)}`:''}${c.extra?`미확인 ${fmt(c.extra,1)}`:''}</td></tr>`; });
  h+=`<tr><td><b>합계</b></td><td><b>${fmt(tot.book,1)}</b></td><td><b>${fmt(tot.yh,1)}</b></td><td><b>${man(tot.coin)}</b></td><td><b>${fmt(tot.cheon,1)}</b></td><td></td></tr></table></div>
-  <div class="note"><span class="tag est">확률 · 기대 비용</span> 돌파는 성공 확률이 있어 1회 비용 × 천장 반영 기대 시도 횟수(평균)로 계산해요. 실제로는 운에 따라 더 적게 들거나, 천장까지 가면 더 들 수 있어요. 개방 단계(9→10, 19→20 …)는 강화서 0, 개방 재료만.</div></div>`;
+  <div class="note"><span class="tag est">확률 · 기대 비용</span> 돌파는 성공 확률이 있어 1회 비용 × 돈 내는 시도 평균 횟수로 계산해요. 돌파 보장: 정해진 횟수만큼 실패하면 다음 시도는 재료 없이 무료 확정이라 그 회차는 비용에 안 넣어요(예: 10% = 14번 실패 → 15번째 무료). 실제로는 운에 따라 더 적게 들거나, 천장까지 가면 더 들 수 있어요. 개방 단계(9→10, 19→20 …)는 강화서 0, 개방 재료만.</div></div>`;
  // 수입
  const inc=(n,lab,R)=>{ const q=R.q; if(!q) return `<tr><td>${lab}</td><td colspan="5">데이터 없음</td></tr>`; const k=R.h;
    return `<tr><td>${lab}</td><td>${man(R.coin)}<div class="dim">몹 ${man(q.coin_mob*k)} · 보따리 ${man(q.coin_bag*k)}<span class="tag est">추정</span> · 정기단 ${man(q.coin_gacha*k)}<span class="tag est">추정</span> · 제작비 ${man(q.coin_craft*k)}</div></td>
