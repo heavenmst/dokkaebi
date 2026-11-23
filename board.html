@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>건의 · 요청</title>
+<style>
+:root{--bg:#F5F6F8;--card:#FFF;--line:#E3E6EB;--tx:#1A1D23;--sub:#5B6472;--dim:#8A93A0;--acc:#1F5EFF;--dn:#DC2626}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.55 "Pretendard","맑은 고딕",system-ui,sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:18px 16px 40px}
+h1{font-size:24px;margin:0 0 2px}.sub{color:var(--sub);font-size:12.5px;margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:14px}
+input,select,textarea{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#FFF;color:var(--tx)}
+textarea{width:100%;min-height:110px;resize:vertical}
+button{font:inherit;padding:8px 16px;border:1px solid var(--acc);border-radius:8px;background:var(--acc);color:#FFF;font-weight:700;cursor:pointer}
+button.g{background:#FFF;color:var(--sub);border-color:var(--line);font-weight:400}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+.post{border-top:1px solid var(--line);padding:12px 2px}.post:first-child{border-top:0}
+.post .h{display:flex;gap:8px;align-items:center;font-size:12.5px;color:var(--sub)}
+.post .h b{color:var(--tx);font-size:14px}.post .t{white-space:pre-wrap;word-break:break-word;margin-top:4px}
+.kd{padding:1px 8px;border-radius:10px;font-size:12px;font-weight:700}.k-건의{background:#EAF0FF;color:var(--acc)}.k-요청{background:#FFF4E0;color:#B7791F}.k-오류{background:#FDECEC;color:var(--dn)}
+.filt button{padding:4px 12px;font-size:13px}
+</style></head><body><div class="wrap">
+<h1>건의 · 요청</h1>
+<div class="sub">계산기에 바라는 점, 틀린 숫자, 추가했으면 하는 기능을 남겨 주세요. 누구나 볼 수 있어요. 쓴 글은 고치거나 지울 수 없어요.</div>
+<div class="card">
+ <div class="row"><input id="nick" maxlength="20" placeholder="닉네임" style="width:160px"><select id="kind"><option>건의</option><option>요청</option><option>오류</option></select></div>
+ <textarea id="body" maxlength="2000" placeholder="내용 (2,000자까지)"></textarea>
+ <div class="row" style="margin-top:8px;margin-bottom:0"><button id="send">올리기</button><span id="msg" style="font-size:13px;color:var(--sub)"></span></div>
+</div>
+<div class="card">
+ <div class="row filt" id="filt"></div>
+ <div id="list"><div style="color:var(--dim)">불러오는 중…</div></div>
+</div>
+</div>
+<script>
+const SUPA={"url":"","key":""},$=id=>document.getElementById(id);
+const ld=(k,d)=>{try{const v=localStorage.getItem('bd_'+k);return v==null?d:JSON.parse(v)}catch(e){return d}};
+const sv=(k,v)=>{try{localStorage.setItem('bd_'+k,JSON.stringify(v))}catch(e){}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const sb=(path,opt={})=>fetch(SUPA.url.replace(/\/$/,'')+'/rest/v1/'+path,Object.assign({},opt,{headers:Object.assign({apikey:SUPA.key,Authorization:'Bearer '+SUPA.key,'Content-Type':'application/json'},opt.headers||{})}));
+let ALL=[],F='전체';
+const when=t=>{const d=new Date(t);return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`};
+function draw(){$('filt').innerHTML=['전체','건의','요청','오류'].map(k=>`<button class="${k===F?'':'g'}" data-f="${k}">${k}${k==='전체'?'':' '+ALL.filter(p=>p.kind===k).length}</button>`).join('');
+  const L=ALL.filter(p=>F==='전체'||p.kind===F);
+  $('list').innerHTML=L.length?L.map(p=>`<div class="post"><div class="h"><span class="kd k-${esc(p.kind)}">${esc(p.kind)}</span><b>${esc(p.nick)}</b><span>${when(p.created_at)}</span></div><div class="t">${esc(p.body)}</div></div>`).join(''):'<div style="color:var(--dim)">아직 글이 없어요</div>';}
+async function load(){if(!SUPA.url){$('list').innerHTML='<div style="color:var(--dim)">게시판 준비 중이에요 (공용 저장소 연결 전)</div>';return}
+  try{const r=await sb('posts?select=*&order=id.desc&limit=300');if(!r.ok)throw new Error(r.status);ALL=await r.json();draw()}catch(e){$('list').innerHTML='<div style="color:var(--dn)">못 불러왔어요 ('+esc(e.message)+')</div>'}}
+$('filt').onclick=e=>{const b=e.target.closest('[data-f]');if(b){F=b.dataset.f;draw()}};
+$('nick').value=ld('nick','');
+$('send').onclick=async()=>{const nick=$('nick').value.trim(),body=$('body').value.trim();
+  if(!nick||!body){$('msg').textContent='닉네임과 내용을 넣어 주세요';return}
+  const last=ld('last',0);if(Date.now()-last<30000){$('msg').textContent='30초에 한 번만 올릴 수 있어요';return}
+  if(!SUPA.url){$('msg').textContent='공용 저장소 연결 전이에요';return}
+  sv('nick',nick);$('send').disabled=true;$('msg').textContent='올리는 중…';
+  try{const r=await sb('posts',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({nick,kind:$('kind').value,body})});if(!r.ok)throw new Error(r.status+' '+(await r.text()).slice(0,80));
+    sv('last',Date.now());$('body').value='';$('msg').textContent='✔ 올렸어요';load()}catch(e){$('msg').textContent='실패: '+e.message}
+  $('send').disabled=false};
+load();
+</script></body></html>
