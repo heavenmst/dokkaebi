@@ -111,6 +111,11 @@ details.how{margin-top:6px}
   <p class="sub">지금 사냥터에서 분당 몇 마리 잡는지 넣으면, 다른 사냥터에서 분당 몇 마리 이상 잡아야 더 이득인지 보여줘요. 드랍률 = 게임 데이터 (11/18 패치).</p>
   <div class="panel">
     <h2>내 기준 사냥터</h2>
+    <style>.ftabs{display:flex;flex-wrap:wrap;gap:4px 3px;margin:2px 0 10px;border-bottom:2px solid var(--acc);padding-left:2px}
+    .ftab{position:relative;padding:6px 12px 5px;border:1px solid var(--line2);border-bottom:0;border-radius:9px 9px 0 0;background:#F1F3F7;color:var(--sub);font-size:12.5px;cursor:pointer;max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:-2px}
+    .ftab:hover{background:#E7ECF6;color:var(--tx)}.ftab.on{background:#FFF;color:var(--acc);font-weight:800;border-color:var(--acc);border-bottom:2px solid #FFF}
+    .ftab small{color:var(--dim);font-weight:400;margin-left:4px}.ftabs .empty{color:var(--dim);font-size:12px;padding:4px 2px 6px}</style>
+    <div class="ftabs" id="mytabs"></div>
     <div class="row" style="grid-template-columns:1fr"><label>사냥터</label><select id="cur" style="width:100%"></select></div>
     <div class="row big"><label>분당 처치</label><input id="kpm" type="number" min="1" step="1" value="90"></div>
     <div id="kcalc" style="background:#F6F8FC;border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:2px 0 8px">
@@ -227,7 +232,7 @@ function render(){
   const rate=z=>1;   // 11/23 사용자: 드랍 감소는 게임에서 보여 줘서 계산 뺌
   const cz=Z[ci],cv=val(cz)*rate(cz),perMin=cv*kpm;
   $('kpi').innerHTML=isReg()?NEED_ALL.map(([k,n,d])=>{const v=amt(cz,k)*kpm*60;return v>0?`<div><b>${fmt(v,d)}</b><span>시간당 ${n}</span></div>`:''}).join(''):REG_MSG;
-  renderNeed(ci,kpm);
+  renderNeed(ci,kpm);drawTabs();
   renderCmp();
 }
 // 11/23 사용자: 기준 처치 수를 엽전·요혼석·영기 수련권 따로, 단일 비경 / 필드로 나눠서, 내 전투력 ± 범위 안만
@@ -331,7 +336,11 @@ let MY=ld('myspots',[]);
 const zIdx=k=>Z.findIndex(z=>key(z)===k);
 const manG=v=>(Math.round(v/1000)/10)+'만';
 const MY_IT=[['엽전','엽전',0],['요혼석','요혼석',1],['정기단','정기단',1],['조화단','조화단',3],['가속분','영기 수련(분)',0],['전설재료','전설 재료',2]];
-function renderMy(){sv('myspots',MY);
+// 11/23 사용자: 메인 사냥터 목록 = 맨 위 폴더 탭, 누르면 그 사냥터로 바로
+function drawTabs(){const t=$('mytabs');if(!t)return;const ck=Z[+$('cur').value]?key(Z[+$('cur').value]):'';
+  t.innerHTML=MY.length?MY.map((m,i)=>`<div class="ftab ${m.key===ck?'on':''}" data-myi="${i}" title="${m.key} · 분당 ${m.k}마리 — 누르면 이 사냥터로">📁 ${m.key}<small>${m.k}</small></div>`).join('')
+   :'<div class="empty">📁 메인 사냥터를 등록하면 여기 탭으로 생겨요</div>';}
+function renderMy(){sv('myspots',MY);drawTabs();
   $('myspots').innerHTML=MY.length?MY.map((m,i)=>{const zi=zIdx(m.key),z=Z[zi];const pw=z?z.pw:m.pw;
     const its=z?MY_IT.map(([k,n,d])=>{const v=amt(z,k)*m.k*60;return v>0?`<span style="display:inline-block;margin:2px 10px 0 0">${n} <b>${fq(v,d)}</b></span>`:''}).join(''):'<small>사냥터 정보 없음</small>';
     return `<div class="myit" data-myi="${i}" title="누르면 「지금 사냥」에 넣기" style="cursor:pointer;padding:7px 9px;border:1px solid var(--line);border-radius:8px;margin:5px 0;background:#FAFBFC">
@@ -347,6 +356,7 @@ function regCur(btn){const zi=+$('cur').value,z=Z[zi];if(!z)return;const d=new D
   const e={key:key(z),pw:z.pw,k:+$('kpm').value||0,atk:$('atk').value,def:$('def').value,mp:$('mypw').value,at};const o=MY.findIndex(m=>m.key===e.key);if(o>=0)MY[o]=e;else MY.unshift(e);
   renderMy();markReg();render();if(btn){btn.textContent='✔ 등록됨';setTimeout(()=>btn.textContent='⭐ 메인 사냥터로 등록',1000)}}
 $('regcur').onclick=e=>regCur(e.currentTarget);
+$('mytabs').onclick=e=>{const c=e.target.closest('[data-myi]');if(!c)return;const m=MY[+c.dataset.myi];if(m.atk)$('atk').value=K_(m.atk);if(m.def)$('def').value=K_(m.def);if(m.mp)$('mypw').value=+m.mp>=10000?+m.mp/1000:m.mp;toCur(zIdx(m.key),m.k);markReg();render()};
 $('myspots').onclick=e=>{const b=e.target.closest('[data-myx]');if(b){MY.splice(+b.dataset.myx,1);renderMy();return}const c=e.target.closest('[data-myi]');if(c){const m=MY[+c.dataset.myi];if(m.atk)$('atk').value=K_(m.atk);if(m.def)$('def').value=K_(m.def);if(m.mp)$('mypw').value=+m.mp>=10000?+m.mp/1000:m.mp;toCur(zIdx(m.key),m.k);markReg();render()}};
 $('loadrec').onclick=()=>{const L=MY.map(m=>({z:zIdx(m.key),k:m.k})).filter(r=>r.z>=0);if(!L.length)return;RECS=L;
   const last=MY[MY.length-1];if(last.atk)$('atk').value=last.atk;if(last.def)$('def').value=last.def;renderRecs();render()};
