@@ -79,7 +79,7 @@ function show(){
   document.querySelector(`nav a[data-t="${k}"]`).classList.toggle('on',on);});
  document.title={hunt:'사냥터 효율',dps:'도술 DPS',growth:'성장 목표',salvage:'금전시세 / 분해 계산',board:'건의 · 수정 · 요청'}[t]+' · 도깨비의 세계 - 몽련1 연문파';
 }
-const INFO={"client": "도깨비의 세계 PC 클라이언트 (Unity 6000.3)", "client_patch": "2026-11-18 대격변 패치", "client_note": "드랍표·도술 수치·지도 = 이 패치 클라이언트에서 직접 추출", "ver": "1.111", "updated": "2026-11-23 11:10"};
+const INFO={"client": "도깨비의 세계 PC 클라이언트 (Unity 6000.3)", "client_patch": "2026-11-18 대격변 패치", "client_note": "드랍표·도술 수치·지도 = 이 패치 클라이언트에서 직접 추출", "ver": "1.112", "updated": "2026-11-23 11:12"};
 document.getElementById('info').innerHTML=`<span>마지막 업데이트 <b>${INFO.updated}</b></span><span>버전 <b>v${INFO.ver}</b></span><span title="${INFO.client_note}">클라이언트 <b>${INFO.client}</b></span><span>클라이언트 업데이트 <b>${INFO.client_patch}</b></span><span>제작자 : <b>돼</b></span>`;
 // 11/23 사용자: 들어올 때마다 닉네임 확인 화면 (게시판·랭킹이 같은 닉네임 사용)
 const NK='site_nick',getN=()=>{try{return localStorage.getItem(NK)||''}catch(e){return''}};
