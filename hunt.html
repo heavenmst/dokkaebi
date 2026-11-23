@@ -104,6 +104,46 @@ details.allx>summary{cursor:pointer;font-size:16px;font-weight:800;padding:2px 0
 details.how{margin-top:6px}
 .cmpv b{font-size:13.5px}.cmpv small{display:inline;margin-left:8px;font-size:11px}
 #cmp table,#cmpt{max-width:1500px}
+
+/* ── 모바일 (11/23) — 데스크톱은 그대로, 760px 이하만 1단 ── */
+@media(max-width:760px){
+body{font-size:14px;-webkit-text-size-adjust:100%}
+.wrap{grid-template-columns:minmax(0,1fr)!important;padding:10px 10px 24px;gap:10px}
+.wrap>div{min-width:0}
+h1{font-size:20px}.sub{font-size:12.5px;line-height:1.55;margin:4px 0 10px}
+.panel{padding:12px 12px;margin-bottom:10px;border-radius:14px}
+.panel h2{font-size:15.5px;line-height:1.4}
+.panel h2 select{max-width:100%;margin:6px 0 0!important}
+select{max-width:100%}
+input[type=number],select{min-height:38px;font-size:16px}
+button{min-height:38px;padding:6px 12px!important;border-radius:9px}
+.ftabs{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch}.ftabs::-webkit-scrollbar{display:none}
+.ftab{flex:0 0 auto;padding:9px 12px 8px;font-size:13px}
+#lp .f4{gap:6px}#lp .f4 label{font-size:12px}
+#kpi.kpi b{font-size:14px}
+.tbl{max-height:75vh;-webkit-overflow-scrolling:touch}
+.tbl td[colspan]{white-space:normal}
+.tbl th:first-child,.tbl td:first-child{position:sticky;left:0;z-index:1;background:var(--card);white-space:normal;min-width:104px;max-width:132px;box-shadow:inset -1px 0 0 var(--line)}
+.tbl th:first-child{z-index:3;background:var(--soft)}.tbl tbody tr:nth-child(even) td:first-child{background:#FAFBFC}
+th,td{padding:6px 7px;font-size:12.5px}th{font-size:12px}
+td.sec2{min-width:96px}
+.secs{grid-template-columns:minmax(0,1fr)}
+.cmpv small{display:block;margin-left:0}
+details.how summary,details.allx>summary{padding:6px 0}
+.dunb button{min-height:34px!important;padding:4px 12px!important}
+/* 내 기록 비교 줄: 8칸 한 줄 → 3줄 (A·가져오기·× / 사냥터·레벨 / 마리·메인등록) */
+#recs .row{display:flex!important;flex-wrap:wrap;gap:6px!important;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line);margin:0}
+#recs .row>b{flex:0 0 22px;order:0;font-size:16px}
+#recs .row>.rget{flex:1 1 calc(100% - 78px);order:1;min-width:0}
+#recs .row>.rx{flex:0 0 38px;order:2;padding:0!important}
+#recs .row>.rzn{flex:1 1 calc(50% - 20px);order:3;min-width:0;margin-left:28px}
+#recs .row>.rz{flex:1 1 calc(50% - 20px);order:4;min-width:0}
+#recs .row>.rk{flex:0 0 84px;order:5;margin:0 0 0 28px;padding:4px 7px;max-height:none;overflow:visible}
+#recs .row>span{order:6}
+#recs .row>.rs{order:7;margin-left:auto}
+#rkBox .rkt td{max-width:110px}
+#zpbody{padding:14px 14px!important;max-height:88vh!important}
+}
 </style></head><body>
 <div class="wrap">
 <div>
@@ -128,7 +168,7 @@ details.how{margin-top:6px}
       <div style="display:flex;align-items:center;gap:6px;margin-top:3px;font-size:12px"><span id="kcR" style="flex:1"></span><span style="color:var(--dim);white-space:nowrap">10분 이상 · 30분 추천</span></div>
     </div>
     <div class="row" style="display:none"><label>이득 기준</label><select id="basis"></select></div>
-    <button id="regcur" class="btn" style="white-space:nowrap;padding:5px 12px" title="지금 값으로 사냥터 등록하고 결과 보기">⭐ 사냥터 등록</button>
+    <button id="regcur" class="btn" style="white-space:nowrap;padding:5px 12px" title="지금 값으로 사냥터 등록하고 결과 보기">⭐ 사냥터 등록</button> <button id="setmain" class="btn" style="white-space:nowrap;padding:5px 12px" title="지금 사냥터를 메인으로 — 랭킹·성장 목표에 쓰임 (등록 1개면 자동으로 메인)">👑 메인 사냥터 지정</button>
     <div class="kpi" id="kpi"></div>
     <div id="myspots"></div>
     </div>
@@ -138,9 +178,8 @@ details.how{margin-top:6px}
     <div id="rkTabs" style="display:none"></div>
     <div id="rkBox"></div>
     <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)">
-      <b style="font-size:13px">내 기록 올리기</b><span id="rkNick" style="font-size:13px"></span>
-      <button id="rkSend" class="btn">등록한 사냥터 올리기</button><span id="rkMsg" style="font-size:12.5px;color:var(--sub)"></span></div>
-    <div style="color:var(--dim);font-size:11.5px;margin-top:4px">「⭐ 사냥터 등록」한 사냥터 1개만 올라가요 · 다시 올리면 바뀜</div>
+      <span id="rkNick" style="font-size:13px"></span><span id="rkMain" style="font-size:12.5px"></span><span id="rkMsg" style="font-size:12.5px;color:var(--sub)"></span></div>
+    <div style="color:var(--dim);font-size:11.5px;margin-top:4px">👑 메인 사냥터 1개가 자동으로 올라가요 (등록 1개면 그게 메인) · 메인을 바꾸면 랭킹도 바뀜</div>
   </div>
 </div>
 <div>
@@ -340,7 +379,7 @@ const MY_IT=[['엽전','엽전',0],['요혼석','요혼석',1],['정기단','정
 // 11/23 사용자: 메인 사냥터 목록 = 맨 위 폴더 탭, 누르면 그 사냥터로 바로
 let MYOPEN=-1;
 function drawTabs(){const t=$('mytabs');if(!t)return;const ck=Z[+$('cur').value]?key(Z[+$('cur').value]):'';
-  t.innerHTML=MY.length?MY.map((m,i)=>`<div class="ftab ${m.key===ck?'on':''}" data-myi="${i}" title="${m.key} · 분당 ${m.k}마리 — 누르면 이 사냥터로 + 정보 펼치기">${i===MYOPEN?'📂':'📁'} ${m.key}<small>${m.k}</small></div>`).join('')
+  t.innerHTML=MY.length?MY.map((m,i)=>`<div class="ftab ${m.key===ck?'on':''}" data-myi="${i}" title="${m.key} · 분당 ${m.k}마리 — 누르면 이 사냥터로 + 정보 펼치기">${i===MYOPEN?'📂':'📁'} ${mainOf()===m?'👑 ':''}${m.key}<small>${m.k}</small></div>`).join('')
    :'<div class="empty">📁 사냥터를 등록하면 여기 탭으로 생겨요</div>';}
 function renderMy(){sv('myspots',MY);drawTabs();
   document.querySelectorAll('#recs .rget').forEach(e=>{e.innerHTML='<option value="">📁 사냥터 가져오기</option>'+MY.map((m,i)=>`<option value="${i}">${m.key} · 분당 ${m.k}</option>`).join('')});
@@ -353,14 +392,18 @@ function renderMy(){sv('myspots',MY);drawTabs();
 function toCur(zi,k){if(zi<0)return;$('cur').value=zi;$('kpm').value=k;$('cur').dispatchEvent(new Event('change'));}
 function saveRec(j,btn){const r=RECS[j],z=Z[r.z];if(!z)return;const d=new Date(),at=`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
   const e={key:key(z),pw:z.pw,k:r.k,atk:$('atk').value,def:$('def').value,mp:$('mypw').value,at};const o=MY.findIndex(m=>m.key===e.key);if(o>=0)MY[o]=e;else MY.unshift(e);
-  renderMy();toCur(r.z,r.k);markReg();render();if(btn){btn.textContent='✔';setTimeout(()=>btn.textContent='⭐ 메인등록',1000)}}
+  renderMy();toCur(r.z,r.k);markReg();render();if(typeof pushMain==='function')pushMain();if(btn){btn.textContent='✔';setTimeout(()=>btn.textContent='⭐ 메인등록',1000)}}
 // 11/23 사용자: 왼쪽 「내 기준 사냥터」 값 그대로 메인 사냥터 등록 (같은 사냥터·구역은 새 값으로)
 function regCur(btn){const zi=+$('cur').value,z=Z[zi];if(!z)return;const d=new Date(),at=`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
   const e={key:key(z),pw:z.pw,k:+$('kpm').value||0,atk:$('atk').value,def:$('def').value,mp:$('mypw').value,at};const o=MY.findIndex(m=>m.key===e.key);if(o>=0)MY[o]=e;else MY.unshift(e);MYOPEN=-1;
   renderMy();markReg();render();if(btn){btn.textContent='✔ 등록됨';setTimeout(()=>btn.textContent='⭐ 사냥터 등록',1000)}}
-$('regcur').onclick=e=>regCur(e.currentTarget);
+$('regcur').onclick=e=>{regCur(e.currentTarget);if(typeof pushMain==='function')pushMain()};
+// 11/23 사용자: 👑 메인 사냥터 — 등록 1개면 그게 메인, 여러 개면 지정한 곳 (랭킹 자동 + 성장 목표 자동에 쓰임)
+function mainOf(){if(!MY.length)return null;if(MY.length===1)return MY[0];const mk=ld('main',null);return MY.find(m=>m.key===mk)||null;}
+$('setmain').onclick=e=>{const zi=+$('cur').value,z=Z[zi];if(!z)return;const k=key(z);if(!MY.some(m=>m.key===k))regCur();
+  sv('main',k);renderMy();if(typeof pushMain==='function')pushMain();const b=e.currentTarget;b.textContent='✔ 메인 지정됨';setTimeout(()=>b.textContent='👑 메인 사냥터 지정',1200);};
 $('mytabs').onclick=e=>{const c=e.target.closest('[data-myi]');if(!c)return;const ii=+c.dataset.myi;MYOPEN=MYOPEN===ii?-1:ii;renderMy();const m=MY[ii];if(m.atk)$('atk').value=K_(m.atk);if(m.def)$('def').value=K_(m.def);if(m.mp)$('mypw').value=+m.mp>=10000?+m.mp/1000:m.mp;toCur(zIdx(m.key),m.k);markReg();render()};
-$('myspots').onclick=e=>{const b=e.target.closest('[data-myx]');if(b){MY.splice(+b.dataset.myx,1);MYOPEN=-1;renderMy();return}const c=e.target.closest('[data-myi]');if(c){const m=MY[+c.dataset.myi];if(m.atk)$('atk').value=K_(m.atk);if(m.def)$('def').value=K_(m.def);if(m.mp)$('mypw').value=+m.mp>=10000?+m.mp/1000:m.mp;toCur(zIdx(m.key),m.k);markReg();render()}};
+$('myspots').onclick=e=>{const b=e.target.closest('[data-myx]');if(b){MY.splice(+b.dataset.myx,1);MYOPEN=-1;renderMy();if(typeof pushMain==='function')pushMain();return}const c=e.target.closest('[data-myi]');if(c){const m=MY[+c.dataset.myi];if(m.atk)$('atk').value=K_(m.atk);if(m.def)$('def').value=K_(m.def);if(m.mp)$('mypw').value=+m.mp>=10000?+m.mp/1000:m.mp;toCur(zIdx(m.key),m.k);markReg();render()}};
 $('loadrec').onclick=()=>{const L=MY.map(m=>({z:zIdx(m.key),k:m.k})).filter(r=>r.z>=0);if(!L.length)return;RECS=L;
   const last=MY[MY.length-1];if(last.atk)$('atk').value=last.atk;if(last.def)$('def').value=last.def;renderRecs();render()};
 renderMy();
@@ -536,11 +579,15 @@ $('rkBox').onclick=e=>{const b=e.target.closest('.rkcmp');if(b){const r=RK_TOP[b
   const t=e.target.closest('tr.rr');if(!t)return;const id=t.dataset.rk+'_'+t.dataset.i;RK_OPEN=RK_OPEN===id?null:id;drawRk()};
 $('rkTabs').onclick=e=>{const b=e.target.closest('[data-rk]');if(!b)return;RK_SEL=b.dataset.rk;sv('rksel',RK_SEL);drawRkTabs();drawRk()};
 const RNICK=()=>{try{return localStorage.getItem('site_nick')||''}catch(e){return''}};const drawRN=()=>{$('rkNick').innerHTML=RNICK()?`닉네임 <b>${RNICK().replace(/</g,'&lt;')}</b>`:'<span style="color:var(--dn)">닉네임 없음 — 위쪽 👤을 눌러 정해 주세요</span>'};drawRN();addEventListener('storage',e=>{if(e.key==='site_nick')drawRN()});
-$('rkSend').onclick=async()=>{const nick=RNICK().trim();drawRN();if(!nick){$('rkMsg').textContent='위쪽 👤을 눌러 닉네임을 먼저 정해 주세요';return}if(!SUPA.url){$('rkMsg').textContent='공용 저장소 연결 전이에요';return}
-  if(!isReg()){$('rkMsg').textContent='먼저 「⭐ 사냥터 등록」을 누른 사냥터만 올라가요';return}
-  const z=Z[+$('cur').value],k=+$('kpm').value||0;if(!z||!k){$('rkMsg').textContent='사냥터와 분당 처치를 넣어 주세요';return}
-  const row={nick,zone:key(z),mon_pw:z.pw||null,atk:+$('atk').value||null,def:+$('def').value||null,mypw:(+$('mypw').value||0)*1000||null,kpm:k,yeop:amt(z,'엽전')*k,yohon:amt(z,'요혼석')*k,jeonggi:amt(z,'정기단')*k};
-  $('rkMsg').textContent='올리는 중…';try{const r=await sb('ranks',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify(row)});if(!r.ok)throw new Error(r.status+' '+(await r.text()).slice(0,80));$('rkMsg').textContent='✔ 올렸어요';loadRk()}catch(e){$('rkMsg').textContent='실패: '+e.message}};
+// 11/23 사용자: 「올리기」 버튼 없앰 → 👑 메인 사냥터(등록 1개면 그것)가 바뀌면 자동으로 랭킹에 올림 (닉네임마다 마지막 1개만 보임)
+async function pushMain(){const m=mainOf();drawMainInfo();if(!m)return;const nick=RNICK().trim();if(!nick||!SUPA.url)return;
+  const z=Z[zIdx(m.key)],k=+m.k||0;if(!z||!k)return;
+  const row={nick,zone:m.key,mon_pw:z.pw||null,atk:+m.atk>=1000?+m.atk/1000:(+m.atk||null),def:+m.def>=1000?+m.def/1000:(+m.def||null),mypw:m.mp?(+m.mp>=10000?+m.mp:+m.mp*1000):null,kpm:k,yeop:amt(z,'엽전')*k,yohon:amt(z,'요혼석')*k,jeonggi:amt(z,'정기단')*k};
+  const sig=nick+'|'+JSON.stringify(row);if(ld('mainsent','')===sig)return;
+  $('rkMsg').textContent='랭킹에 올리는 중…';try{const r=await sb('ranks',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify(row)});if(!r.ok)throw new Error(r.status+' '+(await r.text()).slice(0,80));sv('mainsent',sig);$('rkMsg').textContent='✔ 랭킹 반영됨';loadRk()}catch(e){$('rkMsg').textContent='랭킹 올리기 실패: '+e.message}}
+function drawMainInfo(){const m=mainOf();if($('rkMain'))$('rkMain').innerHTML=m?`· 👑 메인 <b>${m.key.replace(/</g,'&lt;')}</b> 분당 ${m.k}`:'· <span style="color:var(--dim)">메인 사냥터 없음 — 「⭐ 사냥터 등록」 후 「👑 메인 사냥터 지정」</span>';}
+addEventListener('storage',e=>{if(e.key==='site_nick')pushMain()});
+pushMain();
 drawRkTabs();loadRk();
 </script>
 </body></html>
