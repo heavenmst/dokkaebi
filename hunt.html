@@ -542,7 +542,7 @@ drawNeedIts();
 // 11/23 사용자: 처치 수 ÷ 걸린 시간 → 분당 처치
 function kcSec(){const g=id=>Math.max(0,parseFloat($(id).value)||0);return g('kcH')*3600+g('kcM')*60+g('kcS');}   // 걸린 초 = 시간*3600+분*60+초
 function kcCalc(){const n=+$('kcN').value||0,sec=kcSec();if(!n||!sec){$('kcR').innerHTML='<span style="color:var(--dim)">처치 수와 시간을 넣으면 분당 처치가 나와요</span>';return 0}
-  const v=n/(sec/60),m=sec/60;$('kcR').innerHTML=`분당 <b style="font-size:15px">${v.toLocaleString('ko-KR',{maximumFractionDigits:1})}</b>마리 <span style="color:var(--dim)">(${(()=>{const t=Math.round(sec),h=Math.floor(t/3600),mm=Math.floor(t%3600/60),ss=t%60;return (h?h+'시간 ':'')+mm+'분 '+ss+'초'})()})</span>`+(m<10?' <b style="color:var(--dn)">· 10분 미만이라 부정확</b>':'');return v}
+  const v=n/(sec/60),m=sec/60;$('kcR').innerHTML=`분당 <b style="font-size:15px">${v.toLocaleString('ko-KR',{maximumFractionDigits:1})}</b>마리 <span style="color:var(--dim)">(${(()=>{const t=Math.round(sec),h=Math.floor(t/3600),mm=Math.floor(t%3600/60),ss=t%60;return (h?h+'시간 ':'')+mm+'분 '+ss+'초'})()})</span> <span style="color:var(--acc)">→ 「적용」을 누르면 분당 처치에 들어가요</span>`+(m<10?' <b style="color:var(--dn)">· 10분 미만이라 부정확</b>':'');return v}
 ['kcN','kcH','kcM','kcS'].forEach(id=>$(id).addEventListener('input',kcCalc));kcCalc();   // 11/23 사용자: 결과만 미리 보이고 「계산」을 눌러야 분당 처치에 (분당 처치는 직접 입력도 됨)
 ['kcN','kcH','kcM','kcS'].forEach(id=>$(id).addEventListener('keydown',e=>{if(e.key==='Enter')$('kcGo').click()}));
 $('kcGo').onclick=()=>{const v=kcCalc();if(!v)return;$('kpm').value=Math.round(v*10)/10;$('kpm').dispatchEvent(new Event('change'));render();};
@@ -571,7 +571,7 @@ function drawRk(){const esc=t=>String(t??'').replace(/</g,'&lt;');let h='<style>
   for(const [c,n,,d] of RK_IT){const seen=new Set(),top=[];
     const last={};(RK_ROWS||[]).filter(r=>!String(r.zone||'').startsWith('[비경]')).forEach(r=>{if(!last[r.nick]||r.id>last[r.nick].id)last[r.nick]=r});   // 11/23 사용자: 한 사람당 마지막으로 올린 사냥터 1개만
     for(const r of Object.values(last).filter(r=>(r[c]||0)>0).sort((a,b)=>(b[c]||0)-(a[c]||0))){if(seen.has(r.nick))continue;seen.add(r.nick);top.push(r);if(top.length>=5)break}
-    h+=`<table class="rkt"><thead><tr><th style="width:24px">#</th><th>닉네임</th><th style="text-align:right">전투력</th><th style="text-align:right">분당 ${n}</th><th style="text-align:right">시간당</th></tr></thead><tbody> <span style="color:var(--acc)">→ 「적용」을 누르면 분당 처치에 들어가요</span>`;
+    h+=`<table class="rkt"><thead><tr><th style="width:24px">#</th><th>닉네임</th><th style="text-align:right">전투력</th><th style="text-align:right">분당 ${n}</th><th style="text-align:right">시간당</th></tr></thead><tbody>`;
     for(let i=0;i<5;i++){const r=top[i];
       if(!r){h+=`<tr><td>${i+1}</td><td style="color:var(--dim)">----</td><td class="n" style="color:var(--dim)">----</td><td class="n" style="color:var(--dim)">----</td><td class="n" style="color:var(--dim)">----</td></tr>`;continue}
       const id=c+'_'+i,v=(+r[c]).toLocaleString('ko-KR',{minimumFractionDigits:2,maximumFractionDigits:2});
