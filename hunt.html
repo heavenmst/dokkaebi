@@ -272,7 +272,7 @@ function render(){
 // 11/23 사용자: 기준 처치 수를 엽전·요혼석·영기 수련권 따로, 단일 비경 / 필드로 나눠서, 내 전투력 ± 범위 안만
 // 숫자 = 지금 사냥터·분당 처치와 시간당 획득량이 「거의 같아지는」 분당 처치 수 (게임 데이터 드랍률)
 const NEED_ALL=[['엽전','엽전',0],['요혼석','요혼석',1],['가속분','영기 수련권(분)',0],['전설재료','전설 재료',2],['조화단','조화단',3],['정기단','정기단',1]];
-let NEED_SEL=ld('needsel',[]);   // 11/23 사용자: 새 아이디는 체크 없음 (내가 체크한 것만)
+let NEED_SEL=ld('needsel',null)||NEED_ALL.map(x=>x[0]);   // 11/23 사용자: 같은 양 비교할 것 = 처음(새 아이디)엔 전부 체크, 이후엔 내가 고른 것
 function drawNeedIts(){$('needits').innerHTML='<b style="font-size:13px">비교할 것</b>'+NEED_ALL.map(([k,n])=>`<label style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border:1px solid var(--line);border-radius:14px;cursor:pointer;font-size:13px;${NEED_SEL.includes(k)?'background:#EAF0FF;border-color:var(--acc)':''}"><input type="checkbox" data-nk="${k}" ${NEED_SEL.includes(k)?'checked':''} style="margin:0">${icoTag(k)}${n}</label>`).join('');}
 function renderNeed(ci,kpm){const cz=Z[ci],mp=(+$('mypw').value||0)*1000;   // 11/23 사용자: 보일 범위를 직접 (최소~최대 K), 내 전투력은 따로 표시
   const ctr=mp||cz.pw,R=($('pwr').value===''?100:Math.max(0,+$('pwr').value||0))*1000,lo=ctr-R,hi=ctr+R;
