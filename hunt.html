@@ -133,9 +133,9 @@ details.how{margin-top:6px}
     <div class="row"><label>내 공격력 <small>K 단위 · 4만 = 40</small></label><input id="atk" type="number" step="0.1" placeholder="예: 40.8"></div>
     <div class="row"><label>내 방어력 <small>K 단위</small></label><input id="def" type="number" step="0.1" placeholder="예: 12"></div>
     <div class="row"><label>내 전투력 <small>K 단위 · 50만 = 500</small></label><input id="mypw" type="number" step="1" placeholder="예: 520"></div>
-    <div style="margin:8px 0 0"><button id="regcur" class="btn" style="white-space:nowrap" title="지금 왼쪽 값(사냥터·분당 처치·공/방/전투력)을 메인 사냥터 목록에 등록하고 결과 보기">⭐ 메인 사냥터로 등록</button></div>
+    <div style="margin:8px 0 0"><button id="regcur" class="btn" style="white-space:nowrap" title="지금 왼쪽 값(사냥터·분당 처치·공/방/전투력)을 메인 사냥터 목록에 등록하고 결과 보기">⭐ 사냥터 등록</button></div>
     <div class="kpi" id="kpi" style="margin-top:8px"></div>
-    <h3 style="margin:12px 0 2px;font-size:14px">메인 사냥터 목록 <small style="font-weight:400;color:var(--dim);font-size:12px">위 버튼이나 기록 비교 A·B 옆 「⭐ 메인 사냥터로 등록」 → 여기 쌓이고 위 기준에 들어감 · 카드 누르면 다시 기준으로</small></h3>
+    <h3 style="margin:12px 0 2px;font-size:14px">메인 사냥터 목록 <small style="font-weight:400;color:var(--dim);font-size:12px">위 버튼이나 기록 비교 A·B 옆 「⭐ 사냥터 등록」 → 여기 쌓이고 위 기준에 들어감 · 카드 누르면 다시 기준으로</small></h3>
     <div id="myspots"></div>
   </div>
 </div>
@@ -221,8 +221,8 @@ function hiAtk(cp){if(OFF[cp])return OFF[cp][1];const c=cp/RU.start_ratio;return
 function dropRate(a,cp,nk){if(!(a>0))return 1;if(a<loAtk(cp))return nk?1:DP.hi.rate;if(a<=hiAtk(cp))return 1;const r=cp/toCp(a);if(r>RU.start_ratio)return RU.start_rate;if(r<=RU.floor_ratio)return RU.floor_rate;return RU.start_rate+(RU.floor_rate-RU.start_rate)*(RU.start_ratio-r)/(RU.start_ratio-RU.floor_ratio)}
 function mult(){return 1}
 const FT=z=>/상시 비경|주간 비경/.test(z.z);
-// 11/23 사용자: 내 기준 사냥터·내 기록 비교는 「⭐ 메인 사냥터로 등록」을 눌러야 결과가 나오게 (등록 시점 값 서명)
-const REG_MSG='<div style="padding:10px 12px;border:1px dashed var(--line2);border-radius:10px;color:var(--sub);font-size:13px;background:var(--soft)">값을 정했으면 「⭐ 메인 사냥터로 등록」을 눌러 주세요 — 누르면 결과가 나와요</div>';
+// 11/23 사용자: 내 기준 사냥터·내 기록 비교는 「⭐ 사냥터 등록」을 눌러야 결과가 나오게 (등록 시점 값 서명)
+const REG_MSG='<div style="padding:10px 12px;border:1px dashed var(--line2);border-radius:10px;color:var(--sub);font-size:13px;background:var(--soft)">값을 정했으면 「⭐ 사냥터 등록」을 눌러 주세요 — 누르면 결과가 나와요</div>';
 const curSig=()=>[$('cur').value,$('kpm').value,$('atk').value,$('def').value,$('mypw').value].join('|');
 const isReg=()=>ld('regsig',null)===curSig();
 function markReg(){sv('regsig',curSig());}
@@ -291,7 +291,7 @@ function renderRecs(){
   const pr=n=>PR[n]?' · '+(PR[n][0]===PR[n][1]?man(PR[n][0]):man(PR[n][0])+'~'+man(PR[n][1])):'';
   const nopts=NM.map(n=>`<option value="${n}">${n}${pr(n)}</option>`).join('')+'<optgroup label="── 전래동화 주간 비경 (주 5시간) ──">'+DN.filter(n=>WKN.has(n)).map(n=>`<option value="${n}">${n}${pr(n)}</option>`).join('')+'</optgroup><optgroup label="── 비경 · 상시 비경 ──">'+DN.filter(n=>!WKN.has(n)).map(n=>`<option value="${n}">${n}${pr(n)}${ALN.has(n)?' — 주간 5시간 소진 후':''}</option>`).join('')+'</optgroup>';
   const lopts=n=>Z.map((z,i)=>z.z===n?`<option value="${i}">${z.lv||'전체'} · ${man(z.pw)}</option>`:'').join('');
-  $('recs').innerHTML=RECS.map((r,j)=>`<div class="row" style="grid-template-columns:22px minmax(0,1fr) minmax(0,150px) 76px auto 76px 34px;gap:6px"><b style="color:var(--gold)">${String.fromCharCode(65+j)}</b><select data-j="${j}" class="rzn">${nopts}</select><select data-j="${j}" class="rz">${lopts((Z[r.z]||Z[0]).z)}</select><input type="number" min="1" data-j="${j}" class="rk" value="${r.k}"><span style="color:var(--sub)">마리/분</span><button data-j="${j}" class="rs" style="white-space:nowrap;padding:5px 8px" title="이 기록을 왼쪽 「내 기준 사냥터」로 보내고 메인 사냥터 목록에 등록">⭐ 메인 사냥터로 등록</button>${RECS.length>1?`<button data-j="${j}" class="rx" title="삭제">×</button>`:''}</div>`).join('');
+  $('recs').innerHTML=RECS.map((r,j)=>`<div class="row" style="grid-template-columns:22px minmax(0,1fr) minmax(0,150px) 76px auto 76px 34px;gap:6px"><b style="color:var(--gold)">${String.fromCharCode(65+j)}</b><select data-j="${j}" class="rzn">${nopts}</select><select data-j="${j}" class="rz">${lopts((Z[r.z]||Z[0]).z)}</select><input type="number" min="1" data-j="${j}" class="rk" value="${r.k}"><span style="color:var(--sub)">마리/분</span><button data-j="${j}" class="rs" style="white-space:nowrap;padding:5px 8px" title="이 기록을 왼쪽 「내 기준 사냥터」로 보내고 메인 사냥터 목록에 등록">⭐ 사냥터 등록</button>${RECS.length>1?`<button data-j="${j}" class="rx" title="삭제">×</button>`:''}</div>`).join('');
   $('recs').querySelectorAll('.rzn').forEach(e=>{e.value=(Z[RECS[e.dataset.j].z]||Z[0]).z;e.onchange=()=>{const o=Z[RECS[e.dataset.j].z]||{};let i=Z.findIndex(z=>z.z===e.value&&z.lv===o.lv);if(i<0)i=Z.findIndex(z=>z.z===e.value);RECS[e.dataset.j].z=i;renderRecs()}});
   $('recs').querySelectorAll('.rz').forEach(e=>{e.value=RECS[e.dataset.j].z;e.onchange=()=>{RECS[e.dataset.j].z=+e.value;renderRecs()}});
   $('recs').querySelectorAll('.rk').forEach(e=>e.oninput=()=>{RECS[e.dataset.j].k=+e.value||0;sv('recs',RECS);renderCmp()});guardSel($('recs'));
@@ -339,22 +339,22 @@ const MY_IT=[['엽전','엽전',0],['요혼석','요혼석',1],['정기단','정
 // 11/23 사용자: 메인 사냥터 목록 = 맨 위 폴더 탭, 누르면 그 사냥터로 바로
 function drawTabs(){const t=$('mytabs');if(!t)return;const ck=Z[+$('cur').value]?key(Z[+$('cur').value]):'';
   t.innerHTML=MY.length?MY.map((m,i)=>`<div class="ftab ${m.key===ck?'on':''}" data-myi="${i}" title="${m.key} · 분당 ${m.k}마리 — 누르면 이 사냥터로">📁 ${m.key}<small>${m.k}</small></div>`).join('')
-   :'<div class="empty">📁 메인 사냥터를 등록하면 여기 탭으로 생겨요</div>';}
+   :'<div class="empty">📁 사냥터를 등록하면 여기 탭으로 생겨요</div>';}
 function renderMy(){sv('myspots',MY);drawTabs();
   $('myspots').innerHTML=MY.length?MY.map((m,i)=>{const zi=zIdx(m.key),z=Z[zi];const pw=z?z.pw:m.pw;
     const its=z?MY_IT.map(([k,n,d])=>{const v=amt(z,k)*m.k*60;return v>0?`<span style="display:inline-block;margin:2px 10px 0 0">${n} <b>${fq(v,d)}</b></span>`:''}).join(''):'<small>사냥터 정보 없음</small>';
     return `<div class="myit" data-myi="${i}" title="누르면 「지금 사냥」에 넣기" style="cursor:pointer;padding:7px 9px;border:1px solid var(--line);border-radius:8px;margin:5px 0;background:#FAFBFC">
     <div style="display:flex;align-items:center;gap:8px"><b style="flex:1">${m.key} <span style="color:#B7791F">· 몬스터 ${pw?manG(pw):'—'}</span> <span style="font-weight:400;color:var(--sub)">· 분당 ${m.k}마리</span></b><button data-myx="${i}" title="지우기" style="padding:2px 8px">✕</button></div>
     <div style="font-size:12.5px;margin:2px 0"><b>공</b> ${m.atk?fmt(+m.atk>=1000?+m.atk/1000:+m.atk,1)+'K':'—'} · <b>방</b> ${m.def?fmt(+m.def>=1000?+m.def/1000:+m.def,1)+'K':'—'} · <b>전투력</b> ${m.mp?fmt(+m.mp>=10000?+m.mp/1000:+m.mp)+'K':'—'}</div><div style="font-size:12.5px;color:var(--tx)">시간당 ${its}</div><small style="color:var(--dim)">${m.at}</small></div>`}).join('')
-   :'<div style="color:var(--dim);font-size:13px">아직 없음 — 위 「⭐ 메인 사냥터로 등록」이나 오른쪽 기록 비교 A·B 옆 「⭐ 메인 사냥터로 등록」을 누르세요</div>';}
+   :'<div style="color:var(--dim);font-size:13px">아직 없음 — 위 「⭐ 사냥터 등록」이나 오른쪽 기록 비교 A·B 옆 「⭐ 사냥터 등록」을 누르세요</div>';}
 function toCur(zi,k){if(zi<0)return;$('cur').value=zi;$('kpm').value=k;$('cur').dispatchEvent(new Event('change'));}
 function saveRec(j,btn){const r=RECS[j],z=Z[r.z];if(!z)return;const d=new Date(),at=`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
   const e={key:key(z),pw:z.pw,k:r.k,atk:$('atk').value,def:$('def').value,mp:$('mypw').value,at};const o=MY.findIndex(m=>m.key===e.key);if(o>=0)MY[o]=e;else MY.unshift(e);
-  renderMy();toCur(r.z,r.k);markReg();render();if(btn){btn.textContent='✔';setTimeout(()=>btn.textContent='⭐ 메인 사냥터로 등록',1000)}}
+  renderMy();toCur(r.z,r.k);markReg();render();if(btn){btn.textContent='✔';setTimeout(()=>btn.textContent='⭐ 사냥터 등록',1000)}}
 // 11/23 사용자: 왼쪽 「내 기준 사냥터」 값 그대로 메인 사냥터 등록 (같은 사냥터·구역은 새 값으로)
 function regCur(btn){const zi=+$('cur').value,z=Z[zi];if(!z)return;const d=new Date(),at=`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
   const e={key:key(z),pw:z.pw,k:+$('kpm').value||0,atk:$('atk').value,def:$('def').value,mp:$('mypw').value,at};const o=MY.findIndex(m=>m.key===e.key);if(o>=0)MY[o]=e;else MY.unshift(e);
-  renderMy();markReg();render();if(btn){btn.textContent='✔ 등록됨';setTimeout(()=>btn.textContent='⭐ 메인 사냥터로 등록',1000)}}
+  renderMy();markReg();render();if(btn){btn.textContent='✔ 등록됨';setTimeout(()=>btn.textContent='⭐ 사냥터 등록',1000)}}
 $('regcur').onclick=e=>regCur(e.currentTarget);
 $('mytabs').onclick=e=>{const c=e.target.closest('[data-myi]');if(!c)return;const m=MY[+c.dataset.myi];if(m.atk)$('atk').value=K_(m.atk);if(m.def)$('def').value=K_(m.def);if(m.mp)$('mypw').value=+m.mp>=10000?+m.mp/1000:m.mp;toCur(zIdx(m.key),m.k);markReg();render()};
 $('myspots').onclick=e=>{const b=e.target.closest('[data-myx]');if(b){MY.splice(+b.dataset.myx,1);renderMy();return}const c=e.target.closest('[data-myi]');if(c){const m=MY[+c.dataset.myi];if(m.atk)$('atk').value=K_(m.atk);if(m.def)$('def').value=K_(m.def);if(m.mp)$('mypw').value=+m.mp>=10000?+m.mp/1000:m.mp;toCur(zIdx(m.key),m.k);markReg();render()}};
