@@ -164,7 +164,7 @@ details.how summary,details.allx>summary{padding:6px 0}
     <div class="f4" style="grid-template-columns:repeat(3,minmax(0,1fr))"><label>공격력 K<input id="atk" type="number" step="0.1" placeholder="40.8"></label><label>방어력 K<input id="def" type="number" step="0.1" placeholder="12"></label><label>전투력 K<input id="mypw" type="number" step="1" placeholder="520"></label></div>
     <div id="kcalc" style="background:#F6F8FC;border:1px solid var(--line);border-radius:8px;padding:6px 8px;margin:0 0 6px">
       <div class="kc f4" style="margin:0"><label>처치 수<input id="kcN" type="number" min="0" placeholder="3650"></label><label>시간<input id="kcH" type="number" min="0" placeholder="0"></label><label>분<input id="kcM" type="number" min="0" placeholder="30"></label><label>초<input id="kcS" type="number" min="0" placeholder="0"></label></div>
-      <div style="display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:6px;align-items:center;margin-top:5px"><b style="font-size:13px">분당 처치</b><input id="kpm" type="number" min="0" step="0.1" value="90" style="width:100%;padding:5px 6px;box-sizing:border-box;font-weight:700"><button id="kcGo" class="btn" style="padding:5px 12px;white-space:nowrap">계산</button></div>
+      <div style="display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:6px;align-items:center;margin-top:5px"><b style="font-size:13px">분당 처치</b><input id="kpm" type="number" min="0" step="0.1" value="0"style="width:100%;padding:5px 6px;box-sizing:border-box;font-weight:700"><button id="kcGo" class="btn" style="padding:5px 12px;white-space:nowrap">계산</button></div>
       <div style="display:flex;align-items:center;gap:6px;margin-top:3px;font-size:12px"><span id="kcR" style="flex:1"></span><span style="color:var(--dim);white-space:nowrap">10분 이상 · 30분 추천</span></div>
     </div>
     <div class="row" style="display:none"><label>이득 기준</label><select id="basis"></select></div>
@@ -235,7 +235,7 @@ const val=z=>amt(z,$('basis').value);
 const zn=[...new Set(Z.filter(z=>!z.dun).map(z=>z.z))].filter(n=>M[n]);
 zn.forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;$('msel').appendChild(o)});
 {const og=document.createElement('optgroup');og.label='── 비경 · 전래동화 ──';DUNN.filter(n=>M[n]).forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;og.appendChild(o)});$('msel').appendChild(og)}
-$('cur').value=ld('cur',Z.findIndex(z=>z.z==='역병의 부화장'));$('kpm').value=ld('kpm',90);const K_=v=>{v=+v||0;return v?(v>=1000?v/1000:v):''};$('atk').value=K_(ld('atk',''));
+$('cur').value=ld('cur',Z.findIndex(z=>z.z==='역병의 부화장'));$('kpm').value=ld('kpm',0);const K_=v=>{v=+v||0;return v?(v>=1000?v/1000:v):''};$('atk').value=K_(ld('atk',''));
 $('def').value=K_(ld('def',''));{const a=+ld('mypw','')||0,b=+ld('pwr',100);$('mypw').value=a?(a>=10000?a/1000:a):'';$('pwr').value=b>=10000?b/1000:b;const lo0=ld('pwlo',null),hi0=ld('pwhi',null),c0=(a?(a>=10000?a/1000:a):0)||((Z[+$('cur').value]||{}).pw||0)/1000;$('pwlo').value=lo0!=null?lo0:(c0?Math.max(0,Math.round(c0-100)):'');$('pwhi').value=hi0!=null?hi0:(c0?Math.round(c0+100):'');}
 function fmt(n,d=0){return n.toLocaleString('ko-KR',{maximumFractionDigits:d,minimumFractionDigits:d})}
 // 드랍 감소 (깨비지지 drop-penalty 11/06 방식)
@@ -272,7 +272,7 @@ function render(){
 // 11/23 사용자: 기준 처치 수를 엽전·요혼석·영기 수련권 따로, 단일 비경 / 필드로 나눠서, 내 전투력 ± 범위 안만
 // 숫자 = 지금 사냥터·분당 처치와 시간당 획득량이 「거의 같아지는」 분당 처치 수 (게임 데이터 드랍률)
 const NEED_ALL=[['엽전','엽전',0],['요혼석','요혼석',1],['가속분','영기 수련권(분)',0],['전설재료','전설 재료',2],['조화단','조화단',3],['정기단','정기단',1]];
-let NEED_SEL=ld('needsel',['엽전','요혼석','가속분']);
+let NEED_SEL=ld('needsel',[]);   // 11/23 사용자: 새 아이디는 체크 없음 (내가 체크한 것만)
 function drawNeedIts(){$('needits').innerHTML='<b style="font-size:13px">비교할 것</b>'+NEED_ALL.map(([k,n])=>`<label style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border:1px solid var(--line);border-radius:14px;cursor:pointer;font-size:13px;${NEED_SEL.includes(k)?'background:#EAF0FF;border-color:var(--acc)':''}"><input type="checkbox" data-nk="${k}" ${NEED_SEL.includes(k)?'checked':''} style="margin:0">${icoTag(k)}${n}</label>`).join('');}
 function renderNeed(ci,kpm){const cz=Z[ci],mp=(+$('mypw').value||0)*1000;   // 11/23 사용자: 보일 범위를 직접 (최소~최대 K), 내 전투력은 따로 표시
   const ctr=mp||cz.pw,R=($('pwr').value===''?100:Math.max(0,+$('pwr').value||0))*1000,lo=ctr-R,hi=ctr+R;
@@ -303,7 +303,7 @@ const ICO={"\uc5fd\uc804": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAA
 const icoTag=k=>ICO[k]?`<img src="${ICO[k]}" alt="" style="width:22px;height:22px;vertical-align:middle;margin-right:6px">`:'';
 const per1=v=>{if(!(v>0))return '';const h=1/v;return `<small style="display:block;color:var(--dim)">약 ${fmt(h,h<10?1:0)}시간에 1개${h>=24?` (${(h/24).toFixed(1)}일)`:''}</small>`};
 let RECS=ld('recs',null);
-if(!RECS){const a=Z.findIndex(z=>z.z==='역병의 부화장'),b=Z.findIndex(z=>z.z==='마을 어귀'&&z.lv==='Lv.102');RECS=[{z:a,k:90},{z:b,k:70}]}
+if(!RECS){const a=Z.findIndex(z=>z.z==='역병의 부화장'),b=Z.findIndex(z=>z.z==='마을 어귀'&&z.lv==='Lv.102');RECS=[{z:a,k:0},{z:b,k:0}]}   // 11/23 사용자: 새 아이디 = 분당 0
 function curRate(z){return 1}
 // 11/19: 문서 전체에 막는 휠 리스너를 달면 브라우저가 모든 스크롤을 JS 처리 뒤로 미뤄 버벅임(휠 처리 12ms→6ms 측정) → 목록 칸에만
 function guardSel(r){(r||document).querySelectorAll('select').forEach(s=>{if(s._wg)return;s._wg=1;s.addEventListener('wheel',e=>{e.preventDefault();window.scrollBy(0,e.deltaY)},{passive:false})})}
@@ -330,7 +330,7 @@ function renderRecs(){
   const nopts=NM.map(n=>`<option value="${n}">${n}${pr(n)}</option>`).join('')+'<optgroup label="── 전래동화 주간 비경 (주 5시간) ──">'+DN.filter(n=>WKN.has(n)).map(n=>`<option value="${n}">${n}${pr(n)}</option>`).join('')+'</optgroup><optgroup label="── 비경 · 상시 비경 ──">'+DN.filter(n=>!WKN.has(n)).map(n=>`<option value="${n}">${n}${pr(n)}${ALN.has(n)?' — 주간 5시간 소진 후':''}</option>`).join('')+'</optgroup>';
   const lopts=n=>Z.map((z,i)=>z.z===n?`<option value="${i}">${z.lv||'전체'} · ${man(z.pw)}</option>`:'').join('');
   const MYL=ld('myspots',[]);   // 11/23 사용자: A 옆 「사냥터 가져오기」 = 내 사냥터 목록에서
-  $('recs').innerHTML=RECS.map((r,j)=>`<div class="row" style="grid-template-columns:22px 150px minmax(0,175px) minmax(0,130px) 62px auto auto 30px;gap:6px;justify-content:start"><b style="color:var(--gold)">${String.fromCharCode(65+j)}</b><select data-j="${j}" class="rget" title="내 사냥터 목록에서 가져오기" style="min-width:0"><option value="">📁 사냥터 가져오기</option>${MYL.map((m,i)=>`<option value="${i}">${m.key} · 분당 ${m.k}</option>`).join('')}</select><select data-j="${j}" class="rzn">${nopts}</select><select data-j="${j}" class="rz">${lopts((Z[r.z]||Z[0]).z)}</select><input type="number" min="1" data-j="${j}" class="rk" value="${r.k}"><span style="color:var(--sub)">마리/분</span><button data-j="${j}" class="rs" style="white-space:nowrap;padding:5px 8px" title="이 기록을 왼쪽 「내 기준 사냥터」로 보내고 사냥터 목록에 등록">⭐ 메인등록</button>${RECS.length>1?`<button data-j="${j}" class="rx" title="삭제">×</button>`:''}</div>`).join('');
+  $('recs').innerHTML=RECS.map((r,j)=>`<div class="row" style="grid-template-columns:22px 118px minmax(0,1fr) minmax(0,150px) 62px auto auto 30px;gap:6px"><b style="color:var(--gold)">${String.fromCharCode(65+j)}</b><select data-j="${j}" class="rget" title="내 사냥터 목록에서 가져오기" style="min-width:0"><option value="">📁 사냥터 가져오기</option>${MYL.map((m,i)=>`<option value="${i}">${m.key} · 분당 ${m.k}</option>`).join('')}</select><select data-j="${j}" class="rzn">${nopts}</select><select data-j="${j}" class="rz">${lopts((Z[r.z]||Z[0]).z)}</select><input type="number" min="1" data-j="${j}" class="rk" value="${r.k}"><span style="color:var(--sub)">마리/분</span><button data-j="${j}" class="rs" style="white-space:nowrap;padding:5px 8px" title="이 기록을 왼쪽 「내 기준 사냥터」로 보내고 사냥터 목록에 등록">⭐ 메인등록</button>${RECS.length>1?`<button data-j="${j}" class="rx" title="삭제">×</button>`:''}</div>`).join('');
   $('recs').querySelectorAll('.rzn').forEach(e=>{e.value=(Z[RECS[e.dataset.j].z]||Z[0]).z;e.onchange=()=>{const o=Z[RECS[e.dataset.j].z]||{};let i=Z.findIndex(z=>z.z===e.value&&z.lv===o.lv);if(i<0)i=Z.findIndex(z=>z.z===e.value);RECS[e.dataset.j].z=i;renderRecs()}});
   $('recs').querySelectorAll('.rz').forEach(e=>{e.value=RECS[e.dataset.j].z;e.onchange=()=>{RECS[e.dataset.j].z=+e.value;renderRecs()}});
   $('recs').querySelectorAll('.rk').forEach(e=>e.oninput=()=>{RECS[e.dataset.j].k=+e.value||0;sv('recs',RECS);renderCmp()});guardSel($('recs'));
