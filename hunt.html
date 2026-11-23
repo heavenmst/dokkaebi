@@ -354,7 +354,8 @@ function renderCmp(){
     h+=`<tr><td class="l" style="border-left:4px solid ${col};padding-left:8px">${icoTag(k)}<b>${n}</b></td>${vals.map((v,j)=>`<td class="cmpv"><b>${fq(v,d)}</b>${j?pct(v,vals[0]):''}<small>분당 ${fq(v/60,d+1)}</small>${(k.startsWith('만귀령패')||k==='조화단')?per1(v):''}</td>`).join('')}</tr>`;
   }
   h+='</tbody>';
-  if(isReg())$('cmp').innerHTML=h;else $('cmp').innerHTML=`<tbody><tr><td style="text-align:left;border:0;padding:0">${REG_MSG}</td></tr></tbody>`;
+  // 11/23 사용자: 기록 비교 표는 👑 메인 사냥터가 정해져야 보임
+  if(mainOf())$('cmp').innerHTML=h;else $('cmp').innerHTML=`<tbody><tr><td style="text-align:left;border:0;padding:0"><div style="padding:12px;border:1px dashed var(--line);border-radius:10px;color:var(--sub);background:var(--soft)">「👑 메인 사냥터 지정」을 눌러 주세요 — 메인 사냥터가 있어야 기록 비교 결과가 나와요</div></td></tr></tbody>`;
   $('cmpwarn').innerHTML=RECS.map((r,j)=>{const z=Z[r.z];if(!z||z.tw==null)return'';const t=Z[z.tw],L=String.fromCharCode(65+j),a=amt(z,'전설재료'),b=amt(t,'전설재료');
     if(z.al)return`<div class="cw">⚠ <b>${L}는 상시 비경</b>이에요 — 주간 5시간을 다 쓴 뒤 가는 곳. 주간 5시간 동안은 드랍표가 달라요${a>0&&b>0?` (같은 마릿수면 전설 재료 환산 <b>약 ${fmt(b/a,0)}배</b>)`:b>0?'':' (주간 비경 드랍표는 별의 조각만)'}. <button data-j="${j}" data-t="${z.tw}">${L}를 주간 비경으로 바꿔 보기</button></div>`;
     return`<div class="cw ok">✔ <b>${L}는 주간 비경</b>이에요 — 주 5시간, 수요일 05:00 충전. 5시간을 다 쓰면 같은 자리가 상시 비경 표로 바뀌어요${a>0&&b>0?` (전설 재료 환산 약 1/${fmt(a/b,0)})`:''}. <button data-j="${j}" data-t="${z.tw}">${L}를 상시 비경으로 바꿔 보기</button></div>`}).join('');
@@ -593,7 +594,7 @@ async function pushMain(){const m=mainOf();drawMainInfo();const nick=RNICK().tri
   const z=Z[zIdx(m.key)],k=+m.k||0;if(!z||!k)return;
   const row={nick,zone:m.key,mon_pw:z.pw||null,atk:+m.atk>=1000?+m.atk/1000:(+m.atk||null),def:+m.def>=1000?+m.def/1000:(+m.def||null),mypw:m.mp?(+m.mp>=10000?+m.mp:+m.mp*1000):null,kpm:k,yeop:amt(z,'엽전')*k,yohon:amt(z,'요혼석')*k,jeonggi:amt(z,'정기단')*k};
   rkPost(row,'✔ 랭킹 반영됨')}
-function drawMainInfo(){const m=mainOf();if($('rkMain'))$('rkMain').innerHTML=m?`· 👑 메인 <b>${m.key.replace(/</g,'&lt;')}</b> 분당 ${m.k}`:'· <span style="color:var(--dim)">메인 사냥터 없음 — 「⭐ 사냥터 등록」 후 「👑 메인 사냥터 지정」</span>';}
+function drawMainInfo(){const m=mainOf();try{renderCmp()}catch(e){}if($('rkMain'))$('rkMain').innerHTML=m?`· 👑 메인 <b>${m.key.replace(/</g,'&lt;')}</b> 분당 ${m.k}`:'· <span style="color:var(--dim)">메인 사냥터 없음 — 「⭐ 사냥터 등록」 후 「👑 메인 사냥터 지정」</span>';}
 addEventListener('storage',e=>{if(e.key==='site_nick')pushMain()});
 pushMain();
 drawRkTabs();loadRk();
