@@ -164,7 +164,7 @@ details.how summary,details.allx>summary{padding:6px 0}
     <div class="f4" style="grid-template-columns:repeat(3,minmax(0,1fr))"><label>공격력 K<input id="atk" type="number" step="0.1" placeholder="40.8"></label><label>방어력 K<input id="def" type="number" step="0.1" placeholder="12"></label><label>전투력 K<input id="mypw" type="number" step="1" placeholder="520"></label></div>
     <div id="kcalc" style="background:#F6F8FC;border:1px solid var(--line);border-radius:8px;padding:6px 8px;margin:0 0 6px">
       <div class="kc f4" style="margin:0"><label>처치 수<input id="kcN" type="number" min="0" placeholder="3650"></label><label>시간<input id="kcH" type="number" min="0" placeholder="0"></label><label>분<input id="kcM" type="number" min="0" placeholder="30"></label><label>초<input id="kcS" type="number" min="0" placeholder="0"></label></div>
-      <div style="display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:6px;align-items:center;margin-top:5px"><b style="font-size:13px">분당 처치</b><input id="kpm" type="number" min="0" step="0.1" value="0"style="width:100%;padding:5px 6px;box-sizing:border-box;font-weight:700"><button id="kcGo" class="btn" style="padding:5px 12px;white-space:nowrap">계산</button></div>
+      <div style="display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:6px;align-items:center;margin-top:5px"><b style="font-size:13px">분당 처치</b><input id="kpm" type="number" min="0" step="0.1" value="0"style="width:100%;padding:5px 6px;box-sizing:border-box;font-weight:700"><button id="kcGo" class="btn" style="padding:5px 12px;white-space:nowrap" title="위에서 계산된 분당 처치를 칸에 넣기">적용</button></div>
       <div style="display:flex;align-items:center;gap:6px;margin-top:3px;font-size:12px"><span id="kcR" style="flex:1"></span><span style="color:var(--dim);white-space:nowrap">10분 이상 · 30분 추천</span></div>
     </div>
     <div class="row" style="display:none"><label>이득 기준</label><select id="basis"></select></div>
@@ -571,7 +571,7 @@ function drawRk(){const esc=t=>String(t??'').replace(/</g,'&lt;');let h='<style>
   for(const [c,n,,d] of RK_IT){const seen=new Set(),top=[];
     const last={};(RK_ROWS||[]).filter(r=>!String(r.zone||'').startsWith('[비경]')).forEach(r=>{if(!last[r.nick]||r.id>last[r.nick].id)last[r.nick]=r});   // 11/23 사용자: 한 사람당 마지막으로 올린 사냥터 1개만
     for(const r of Object.values(last).filter(r=>(r[c]||0)>0).sort((a,b)=>(b[c]||0)-(a[c]||0))){if(seen.has(r.nick))continue;seen.add(r.nick);top.push(r);if(top.length>=5)break}
-    h+=`<table class="rkt"><thead><tr><th style="width:24px">#</th><th>닉네임</th><th style="text-align:right">전투력</th><th style="text-align:right">분당 ${n}</th><th style="text-align:right">시간당</th></tr></thead><tbody>`;
+    h+=`<table class="rkt"><thead><tr><th style="width:24px">#</th><th>닉네임</th><th style="text-align:right">전투력</th><th style="text-align:right">분당 ${n}</th><th style="text-align:right">시간당</th></tr></thead><tbody> <span style="color:var(--acc)">→ 「적용」을 누르면 분당 처치에 들어가요</span>`;
     for(let i=0;i<5;i++){const r=top[i];
       if(!r){h+=`<tr><td>${i+1}</td><td style="color:var(--dim)">----</td><td class="n" style="color:var(--dim)">----</td><td class="n" style="color:var(--dim)">----</td><td class="n" style="color:var(--dim)">----</td></tr>`;continue}
       const id=c+'_'+i,v=(+r[c]).toLocaleString('ko-KR',{minimumFractionDigits:2,maximumFractionDigits:2});
