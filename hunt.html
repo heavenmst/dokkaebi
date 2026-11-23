@@ -199,7 +199,7 @@ function render(){
   sv('cur',ci);sv('kpm',kpm);sv('atk',$('atk').value);sv('def',$('def').value);sv('basis',$('basis').value);sv('mypw',$('mypw').value);sv('pwr',$('pwr').value);
   const rate=z=>1;   // 11/23 사용자: 드랍 감소는 게임에서 보여 줘서 계산 뺌
   const cz=Z[ci],cv=val(cz)*rate(cz),perMin=cv*kpm;
-  $('kpi').innerHTML=NEED_ALL.map(([k,n,d])=>{const v=amt(cz,k)*kpm*60;return v>0?`<div><b>${fmt(v,d)}</b><span>${icoTag(k)}시간당 ${n}</span></div>`:''}).join('');
+  $('kpi').innerHTML=NEED_ALL.map(([k,n,d])=>{const v=amt(cz,k)*kpm*60;return v>0?`<div><b>${fmt(v,d)}</b><span>시간당 ${n}</span></div>`:''}).join('');
   renderNeed(ci,kpm);
   renderCmp();
 }
@@ -305,7 +305,7 @@ const manG=v=>(Math.round(v/1000)/10)+'만';
 const MY_IT=[['엽전','엽전',0],['요혼석','요혼석',1],['정기단','정기단',1],['조화단','조화단',3],['가속분','영기 수련(분)',0],['전설재료','전설 재료',2]];
 function renderMy(){sv('myspots',MY);
   $('myspots').innerHTML=MY.length?MY.map((m,i)=>{const zi=zIdx(m.key),z=Z[zi];const pw=z?z.pw:m.pw;
-    const its=z?MY_IT.map(([k,n,d])=>{const v=amt(z,k)*m.k*60;return v>0?`<span style="display:inline-block;margin:2px 10px 0 0">${icoTag(k)}${n} <b>${fq(v,d)}</b></span>`:''}).join(''):'<small>사냥터 정보 없음</small>';
+    const its=z?MY_IT.map(([k,n,d])=>{const v=amt(z,k)*m.k*60;return v>0?`<span style="display:inline-block;margin:2px 10px 0 0">${n} <b>${fq(v,d)}</b></span>`:''}).join(''):'<small>사냥터 정보 없음</small>';
     return `<div class="myit" data-myi="${i}" title="누르면 「지금 사냥」에 넣기" style="cursor:pointer;padding:7px 9px;border:1px solid var(--line);border-radius:8px;margin:5px 0;background:#FAFBFC">
     <div style="display:flex;align-items:center;gap:8px"><b style="flex:1">${m.key} <span style="color:#B7791F">· 몬스터 ${pw?manG(pw):'—'}</span> <span style="font-weight:400;color:var(--sub)">· 분당 ${m.k}마리</span></b><button data-myx="${i}" title="지우기" style="padding:2px 8px">✕</button></div>
     <div style="font-size:12.5px;margin:2px 0"><b>공</b> ${m.atk?fmt(+m.atk>=1000?+m.atk/1000:+m.atk,1)+'K':'—'} · <b>방</b> ${m.def?fmt(+m.def>=1000?+m.def/1000:+m.def,1)+'K':'—'} · <b>전투력</b> ${m.mp?fmt(+m.mp>=10000?+m.mp/1000:+m.mp)+'K':'—'}</div><div style="font-size:12.5px;color:var(--tx)">시간당 ${its}</div><small style="color:var(--dim)">${m.at}</small></div>`}).join('')
