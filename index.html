@@ -79,12 +79,26 @@ function show(){
   document.querySelector(`nav a[data-t="${k}"]`).classList.toggle('on',on);});
  document.title={hunt:'사냥터 효율',dps:'도술 DPS',growth:'성장 목표',salvage:'금전시세 / 분해 계산',board:'건의 · 수정 · 요청'}[t]+' · 도깨비의 세계 - 몽련1 연문파';
 }
-const INFO={"client": "도깨비의 세계 PC 클라이언트 (Unity 6000.3)", "client_patch": "2026-11-18 대격변 패치", "client_note": "드랍표·도술 수치·지도 = 이 패치 클라이언트에서 직접 추출", "ver": "1.103", "updated": "2026-11-23 10:58"};
+const INFO={"client": "도깨비의 세계 PC 클라이언트 (Unity 6000.3)", "client_patch": "2026-11-18 대격변 패치", "client_note": "드랍표·도술 수치·지도 = 이 패치 클라이언트에서 직접 추출", "ver": "1.104", "updated": "2026-11-23 11:01"};
 document.getElementById('info').innerHTML=`<span>마지막 업데이트 <b>${INFO.updated}</b></span><span>버전 <b>v${INFO.ver}</b></span><span title="${INFO.client_note}">클라이언트 <b>${INFO.client}</b></span><span>클라이언트 업데이트 <b>${INFO.client_patch}</b></span><span>제작자 : <b>돼</b></span>`;
 // 11/23 사용자: 들어올 때마다 닉네임 확인 화면 (게시판·랭킹이 같은 닉네임 사용)
 const NK='site_nick',getN=()=>{try{return localStorage.getItem(NK)||''}catch(e){return''}};
 function drawWho(){const n=getN();document.getElementById('who').innerHTML=n?`👤 <b>${n.replace(/</g,'&lt;')}</b>`:'👤 닉네임 없음';}
-function enter(n){try{if(n!=null)localStorage.setItem(NK,n)}catch(e){}document.getElementById('login').style.display='none';drawWho();}
+// 11/23 사용자: 닉네임(아이디)별 저장값 분리 — 새 아이디는 전부 0/빈칸/체크 해제로 시작
+// 개인 키 = hc_*(사냥터 효율) · sv_*(금전시세/분해) · hm_dps_*(도술 DPS) · growth_plan_v1(성장 목표). site_nick·bd_*(게시판)은 공용
+// 다른 닉으로 들어오면: 지금 개인 키 → 'u:<옛닉>:키' 로 보관, 새 닉 보관분 있으면 복원(없으면 빈 상태) → 계산기 다시 열기
+const UK=k=>/^(hc_|sv_|hm_dps_)/.test(k)||k==='growth_plan_v1', UP=n=>'u:'+encodeURIComponent(n)+':';
+function swapUser(prev,n){
+ try{const LS=localStorage,keys=[];for(let i=0;i<LS.length;i++)keys.push(LS.key(i));
+  // 열린 계산기를 먼저 완전히 닫음 (닫히기 전 storage 이벤트로 옛 값을 다시 저장하는 것 방지)
+  const fr=TABS.map(k=>document.getElementById('f-'+k)),box=fr[0].parentNode;fr.forEach(f=>{f.remove();f.removeAttribute('src')});
+  const po=UP(prev),pn=UP(n);
+  keys.filter(k=>k.startsWith(po)).forEach(k=>LS.removeItem(k));
+  keys.filter(UK).forEach(k=>{LS.setItem(po+k,LS.getItem(k));LS.removeItem(k)});
+  keys.filter(k=>k.startsWith(pn)).forEach(k=>{const b=k.slice(pn.length);if(UK(b))LS.setItem(b,LS.getItem(k));LS.removeItem(k)});
+  fr.forEach(f=>box.appendChild(f));show();
+ }catch(e){console.warn('swapUser',e)}}
+function enter(n){try{if(n!=null){const prev=getN();if(prev&&prev!==n)swapUser(prev,n);localStorage.setItem(NK,n)}}catch(e){}document.getElementById('login').style.display='none';drawWho();}
 // 11/23 두 글자 비밀번호 (Supabase RPC site_login, 비밀번호는 저장 안 함)
 const SUPA={url:'https://ibzlvxjzgdbrnuydqrym.supabase.co',key:'sb_publishable_G37kFCD1FyTo6tCNaaAh-w_xObz5L88'};
 const $id=i=>document.getElementById(i);
