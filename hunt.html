@@ -139,8 +139,8 @@ details.how{margin-top:6px}
     <div id="rkBox"></div>
     <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)">
       <b style="font-size:13px">내 기록 올리기</b><span id="rkNick" style="font-size:13px"></span>
-      <button id="rkSend" class="btn">위 「내 기준 사냥터」로 올리기</button><span id="rkMsg" style="font-size:12.5px;color:var(--sub)"></span></div>
-    <div style="color:var(--dim);font-size:11.5px;margin-top:4px">같은 닉네임은 가장 좋은 기록 하나만 보여요.</div>
+      <button id="rkSend" class="btn">등록한 사냥터 올리기</button><span id="rkMsg" style="font-size:12.5px;color:var(--sub)"></span></div>
+    <div style="color:var(--dim);font-size:11.5px;margin-top:4px">「⭐ 사냥터 등록」한 사냥터 1개만 올라가요 · 다시 올리면 바뀜</div>
   </div>
 </div>
 <div>
@@ -244,10 +244,14 @@ function renderNeed(ci,kpm){const cz=Z[ci],mp=(+$('mypw').value||0)*1000;   // 1
   if(!IT.length){$('needbox').innerHTML='<div style="color:var(--dim)">위에서 비교할 재화를 고르세요</div>';return}
   if(!L.length){$('needbox').innerHTML='<div style="color:var(--dim)">범위 안에 사냥터 없음 — ± 범위를 늘려 보세요</div>';return}
   $('needbox').innerHTML=`<div style="font-size:12.5px;color:var(--sub);margin:0 0 4px">기준: <b>${key(cz)}</b> 분당 <b>${fmt(kpm)}</b>마리 → 각 사냥터에서 이만큼 잡으면 시간당 양이 거의 같음</div>
-    <div class="tbl"><table><thead><tr><th class="l">사냥터</th><th class="l">구역</th><th>몬스터<br>투력</th>${IT.map(([k,n])=>`<th>${icoTag(k)}${n}<br><span style="font-weight:400">분당</span></th>`).join('')}</tr></thead><tbody>`
-    +L.map(({z,i})=>`<tr class="${i===ci?'cur':''}" data-i="${i}" title="${(z.secs||[]).join(', ')}"><td class="l">${z.z}${i===ci?'<span class="tag cur">기준</span>':''}${isS(z)?'<span class="tag al">단일</span>':''}</td><td class="l sec2">${z.lv||'—'}<small>${(z.secs||[]).join(', ')}</small></td><td>${fmt(z.pw)}</td>`
-      +IT.map(([k,,d])=>{const c=amt(cz,k)*kpm,a=amt(z,k);if(!(c>0))return '<td style="color:var(--dim)" title="기준 사냥터에서 안 나옴">—</td>';if(!(a>0))return '<td style="color:var(--dim)">안 나옴</td>';const nd=c/a;
-        return `<td><b class="need ${i===ci?'mid':nd<kpm*0.95?'easy':nd>kpm*1.05?'hard':'mid'}">${fmt(nd,nd<10?1:0)}</b>마리</td>`}).join('')+'</tr>').join('')+'</tbody></table></div>'
+    <div class="tbl"><table><thead><tr><th class="l">사냥터</th><th class="l" style="width:58px">레벨</th><th>몬스터<br>투력</th>${IT.map(([k,n])=>`<th>${icoTag(k)}${n}<br><span style="font-weight:400">분당</span></th>`).join('')}${IT.length>1?'<th style="background:#EEF3FF">평균<br><span style="font-weight:400">고른 것만</span></th>':''}</tr></thead><tbody>`
+    +L.map(({z,i})=>`<tr class="${i===ci?'cur':''}" data-i="${i}" ><td class="l">${z.z}${i===ci?'<span class="tag cur">기준</span>':''}${isS(z)?'<span class="tag al">단일</span>':''}</td><td class="l" style="white-space:nowrap">${z.lv||'—'}</td><td>${fmt(z.pw)}</td>`
+      +(()=>{const nds=[];const cls=nd=>i===ci?'mid':nd<kpm*0.95?'easy':nd>kpm*1.05?'hard':'mid';
+        const tds=IT.map(([k,,d])=>{const c=amt(cz,k)*kpm,a=amt(z,k);if(!(c>0))return '<td style="color:var(--dim)" title="기준 사냥터에서 안 나옴">—</td>';if(!(a>0))return '<td style="color:var(--dim)">안 나옴</td>';const nd=c/a;nds.push(nd);
+        return `<td><b class="need ${cls(nd)}">${fmt(nd,nd<10?1:0)}</b>마리</td>`}).join('');
+        // 11/23 사용자: 맨 오른쪽 = 고른 재화들의 마리 수 평균 (안 나옴·— 은 빼고)
+        const av=nds.length?nds.reduce((x,y)=>x+y,0)/nds.length:null;
+        return tds+(IT.length>1?(av==null?'<td style="background:#F6F8FD;color:var(--dim)">—</td>':`<td style="background:#F6F8FD"><b class="need ${cls(av)}">${fmt(av,av<10?1:0)}</b>마리${nds.length<IT.length?`<small style="display:block;color:var(--dim);font-size:10.5px">${nds.length}개 평균</small>`:''}</td>`):'');})()+'</tr>').join('')+'</tbody></table></div>'
     +`<div style="color:var(--dim);font-size:12px;margin-top:6px">색 = 기준 분당 처치 수보다 적게(초록)/비슷(노랑)/많이(빨강) 잡아야 함 · 줄 누르면 시간당 획득량</div>`;
   $('needbox').querySelectorAll('tr[data-i]').forEach(tr=>tr.onclick=()=>zpop(+tr.dataset.i,1));}
 $('needits').addEventListener('change',e=>{const k=e.target.dataset.nk;if(!k)return;NEED_SEL=NEED_ALL.map(x=>x[0]).filter(x=>x===k?e.target.checked:NEED_SEL.includes(x));sv('needsel',NEED_SEL);drawNeedIts();render()});
@@ -287,7 +291,7 @@ function renderRecs(){
   const nopts=NM.map(n=>`<option value="${n}">${n}${pr(n)}</option>`).join('')+'<optgroup label="── 전래동화 주간 비경 (주 5시간) ──">'+DN.filter(n=>WKN.has(n)).map(n=>`<option value="${n}">${n}${pr(n)}</option>`).join('')+'</optgroup><optgroup label="── 비경 · 상시 비경 ──">'+DN.filter(n=>!WKN.has(n)).map(n=>`<option value="${n}">${n}${pr(n)}${ALN.has(n)?' — 주간 5시간 소진 후':''}</option>`).join('')+'</optgroup>';
   const lopts=n=>Z.map((z,i)=>z.z===n?`<option value="${i}">${z.lv||'전체'} · ${man(z.pw)}</option>`:'').join('');
   const MYL=ld('myspots',[]);   // 11/23 사용자: A 옆 「사냥터 가져오기」 = 내 사냥터 목록에서
-  $('recs').innerHTML=RECS.map((r,j)=>`<div class="row" style="grid-template-columns:22px 128px minmax(0,190px) minmax(0,130px) 62px auto auto 30px;gap:6px;justify-content:start"><b style="color:var(--gold)">${String.fromCharCode(65+j)}</b><select data-j="${j}" class="rget" title="내 사냥터 목록에서 가져오기" style="min-width:0"><option value="">📁 사냥터 가져오기</option>${MYL.map((m,i)=>`<option value="${i}">${m.key} · 분당 ${m.k}</option>`).join('')}</select><select data-j="${j}" class="rzn">${nopts}</select><select data-j="${j}" class="rz">${lopts((Z[r.z]||Z[0]).z)}</select><input type="number" min="1" data-j="${j}" class="rk" value="${r.k}"><span style="color:var(--sub)">마리/분</span><button data-j="${j}" class="rs" style="white-space:nowrap;padding:5px 8px" title="이 기록을 왼쪽 「내 기준 사냥터」로 보내고 사냥터 목록에 등록">⭐ 메인등록</button>${RECS.length>1?`<button data-j="${j}" class="rx" title="삭제">×</button>`:''}</div>`).join('');
+  $('recs').innerHTML=RECS.map((r,j)=>`<div class="row" style="grid-template-columns:22px 150px minmax(0,175px) minmax(0,130px) 62px auto auto 30px;gap:6px;justify-content:start"><b style="color:var(--gold)">${String.fromCharCode(65+j)}</b><select data-j="${j}" class="rget" title="내 사냥터 목록에서 가져오기" style="min-width:0"><option value="">📁 사냥터 가져오기</option>${MYL.map((m,i)=>`<option value="${i}">${m.key} · 분당 ${m.k}</option>`).join('')}</select><select data-j="${j}" class="rzn">${nopts}</select><select data-j="${j}" class="rz">${lopts((Z[r.z]||Z[0]).z)}</select><input type="number" min="1" data-j="${j}" class="rk" value="${r.k}"><span style="color:var(--sub)">마리/분</span><button data-j="${j}" class="rs" style="white-space:nowrap;padding:5px 8px" title="이 기록을 왼쪽 「내 기준 사냥터」로 보내고 사냥터 목록에 등록">⭐ 메인등록</button>${RECS.length>1?`<button data-j="${j}" class="rx" title="삭제">×</button>`:''}</div>`).join('');
   $('recs').querySelectorAll('.rzn').forEach(e=>{e.value=(Z[RECS[e.dataset.j].z]||Z[0]).z;e.onchange=()=>{const o=Z[RECS[e.dataset.j].z]||{};let i=Z.findIndex(z=>z.z===e.value&&z.lv===o.lv);if(i<0)i=Z.findIndex(z=>z.z===e.value);RECS[e.dataset.j].z=i;renderRecs()}});
   $('recs').querySelectorAll('.rz').forEach(e=>{e.value=RECS[e.dataset.j].z;e.onchange=()=>{RECS[e.dataset.j].z=+e.value;renderRecs()}});
   $('recs').querySelectorAll('.rk').forEach(e=>e.oninput=()=>{RECS[e.dataset.j].k=+e.value||0;sv('recs',RECS);renderCmp()});guardSel($('recs'));
@@ -516,7 +520,8 @@ async function loadRk(){if(!SUPA.url){$('rkBox').innerHTML='<div style="color:va
 let RK_OPEN=null;
 function drawRk(){const esc=t=>String(t??'').replace(/</g,'&lt;');let h='<style>#rkBox .rkt{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:8px}#rkBox .rkt th{background:var(--soft);text-align:left;padding:4px 6px;font-size:12px}#rkBox .rkt td{padding:4px 6px;border-top:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px}#rkBox .rkt td.n{text-align:right}#rkBox tr.rr{cursor:pointer}#rkBox tr.rr:hover td{background:#F3F6FC}#rkBox tr.dt td{background:#F8FAFD;color:var(--sub);font-size:12px;white-space:normal}</style>';
   for(const [c,n,,d] of RK_IT){const seen=new Set(),top=[];
-    for(const r of (RK_ROWS||[]).filter(r=>(r[c]||0)>0).sort((a,b)=>(b[c]||0)-(a[c]||0))){if(seen.has(r.nick))continue;seen.add(r.nick);top.push(r);if(top.length>=5)break}
+    const last={};(RK_ROWS||[]).forEach(r=>{if(!last[r.nick]||r.id>last[r.nick].id)last[r.nick]=r});   // 11/23 사용자: 한 사람당 마지막으로 올린 사냥터 1개만
+    for(const r of Object.values(last).filter(r=>(r[c]||0)>0).sort((a,b)=>(b[c]||0)-(a[c]||0))){if(seen.has(r.nick))continue;seen.add(r.nick);top.push(r);if(top.length>=5)break}
     h+=`<table class="rkt"><thead><tr><th style="width:24px">#</th><th>닉네임</th><th>사냥터</th><th style="text-align:right">분당 ${n}</th></tr></thead><tbody>`;
     for(let i=0;i<5;i++){const r=top[i];
       if(!r){h+=`<tr><td>${i+1}</td><td style="color:var(--dim)">----</td><td style="color:var(--dim)">----</td><td class="n" style="color:var(--dim)">----</td></tr>`;continue}
@@ -532,6 +537,7 @@ $('rkBox').onclick=e=>{const b=e.target.closest('.rkcmp');if(b){const r=RK_TOP[b
 $('rkTabs').onclick=e=>{const b=e.target.closest('[data-rk]');if(!b)return;RK_SEL=b.dataset.rk;sv('rksel',RK_SEL);drawRkTabs();drawRk()};
 const RNICK=()=>{try{return localStorage.getItem('site_nick')||''}catch(e){return''}};const drawRN=()=>{$('rkNick').innerHTML=RNICK()?`닉네임 <b>${RNICK().replace(/</g,'&lt;')}</b>`:'<span style="color:var(--dn)">닉네임 없음 — 위쪽 👤을 눌러 정해 주세요</span>'};drawRN();addEventListener('storage',e=>{if(e.key==='site_nick')drawRN()});
 $('rkSend').onclick=async()=>{const nick=RNICK().trim();drawRN();if(!nick){$('rkMsg').textContent='위쪽 👤을 눌러 닉네임을 먼저 정해 주세요';return}if(!SUPA.url){$('rkMsg').textContent='공용 저장소 연결 전이에요';return}
+  if(!isReg()){$('rkMsg').textContent='먼저 「⭐ 사냥터 등록」을 누른 사냥터만 올라가요';return}
   const z=Z[+$('cur').value],k=+$('kpm').value||0;if(!z||!k){$('rkMsg').textContent='사냥터와 분당 처치를 넣어 주세요';return}
   const row={nick,zone:key(z),mon_pw:z.pw||null,atk:+$('atk').value||null,def:+$('def').value||null,mypw:(+$('mypw').value||0)*1000||null,kpm:k,yeop:amt(z,'엽전')*k,yohon:amt(z,'요혼석')*k,jeonggi:amt(z,'정기단')*k};
   $('rkMsg').textContent='올리는 중…';try{const r=await sb('ranks',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify(row)});if(!r.ok)throw new Error(r.status+' '+(await r.text()).slice(0,80));$('rkMsg').textContent='✔ 올렸어요';loadRk()}catch(e){$('rkMsg').textContent='실패: '+e.message}};
