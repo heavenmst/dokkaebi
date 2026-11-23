@@ -19,7 +19,18 @@ main{flex:1;position:relative}
 iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:none;background:var(--bg)}
 iframe.on{display:block}
 @media(max-width:700px){.note{margin-left:0;justify-content:flex-start;font-size:11px}nav a{padding:7px 10px;font-size:14px}.bar{gap:10px}}
+#login{position:fixed;inset:0;background:rgba(20,24,32,.55);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;z-index:99;padding:16px}
+#login .box{background:#FFF;border-radius:18px;padding:28px 28px 22px;width:100%;max-width:400px;box-shadow:0 12px 40px rgba(0,0,0,.25);text-align:center}
+#login h1{font-size:22px;margin:0 0 4px}#login h1 span{color:var(--acc)}
+#login .tip{background:#FFF8E6;border:1px solid #F3DFA8;color:#8A5A00;border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.55;margin:14px 0 16px;text-align:left}
+#login input{width:100%;padding:11px 12px;font-size:15px;border:1px solid var(--line2);border-radius:10px;margin-bottom:10px;text-align:center}
+#login button{width:100%;padding:11px;font-size:15px;font-weight:800;border:0;border-radius:10px;background:var(--acc);color:#FFF;cursor:pointer}
+#login .skip{background:none;color:var(--sub);font-weight:400;font-size:13px;margin-top:4px;padding:6px}
+#who{font-size:12px;color:var(--sub);cursor:pointer}#who b{color:var(--acc)}
 </style></head><body>
+<div id="login"><div class="box"><h1>도깨비의 세계 <span>- 몽련1 연문파</span></h1><div style="color:var(--sub);font-size:13px">사냥터 효율 · 도술 DPS · 성장 목표 · 금전시세</div>
+ <div class="tip">📌 <b>참고용으로만 봐 주세요.</b><br>게임 클라이언트 자료로 계산했지만 실제 게임과 다르거나 틀린 부분이 있을 수 있어요. 이상한 점은 「건의 · 수정 · 요청」에 남겨 주세요.</div>
+ <input id="lgNick" maxlength="20" placeholder="닉네임 (랭킹·게시판에 표시)" autocomplete="nickname"><button id="lgGo">입장하기</button><button class="skip" id="lgSkip">닉네임 없이 둘러보기</button></div></div>
 <header><div class="bar">
  <div class="logo">도깨비의 세계 <span>- 몽련1 연문파</span></div>
  <nav>
@@ -27,15 +38,15 @@ iframe.on{display:block}
   <a href="#dps" data-t="dps"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.5 3.5l6 6L10 20l-6 0 0-6z"/><path d="M12 6l6 6"/></svg>도술 DPS</a>
   <a href="#growth" data-t="growth"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>성장 목표</a>
   <a href="#salvage" data-t="salvage"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></svg>금전시세 / 분해 계산</a>
-  <a href="#board" data-t="board"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>건의 · 요청</a>
+  <a href="#board" data-t="board"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>건의 · 수정 · 요청</a>
  </nav>
- <div class="note" id="info"></div>
+ <div class="note" id="info"></div><div id="who" title="누르면 닉네임 바꾸기"></div>
 </div></header>
 <main>
  <iframe id="f-hunt" data-src="hunt.html" title="사냥터 효율 계산기"></iframe>
  <iframe id="f-dps" data-src="dps.html" title="도술 DPS 계산기"></iframe>
  <iframe id="f-growth" data-src="growth.html" title="성장 목표 계산기"></iframe>
- <iframe id="f-board" data-src="board.html" title="건의 · 요청"></iframe>
+ <iframe id="f-board" data-src="board.html" title="건의 · 수정 · 요청"></iframe>
  <iframe id="f-salvage" data-src="salvage.html" title="금전시세 / 분해 계산"></iframe>
 </main>
 <script>
@@ -46,10 +57,20 @@ function show(){
   if(on&&!f.src) f.src=f.dataset.src;   // 처음 누를 때만 불러오고 이후엔 입력 상태 유지
   f.classList.toggle('on',on);
   document.querySelector(`nav a[data-t="${k}"]`).classList.toggle('on',on);});
- document.title={hunt:'사냥터 효율',dps:'도술 DPS',growth:'성장 목표',salvage:'금전시세 / 분해 계산',board:'건의 · 요청'}[t]+' · 도깨비의 세계 - 몽련1 연문파';
+ document.title={hunt:'사냥터 효율',dps:'도술 DPS',growth:'성장 목표',salvage:'금전시세 / 분해 계산',board:'건의 · 수정 · 요청'}[t]+' · 도깨비의 세계 - 몽련1 연문파';
 }
-const INFO={"client": "도깨비의 세계 PC 클라이언트 (Unity 6000.3)", "client_patch": "2026-11-18 대격변 패치", "client_note": "드랍표·도술 수치·지도 = 이 패치 클라이언트에서 직접 추출", "ver": "1.53", "updated": "2026-11-23 09:26"};
+const INFO={"client": "도깨비의 세계 PC 클라이언트 (Unity 6000.3)", "client_patch": "2026-11-18 대격변 패치", "client_note": "드랍표·도술 수치·지도 = 이 패치 클라이언트에서 직접 추출", "ver": "1.54", "updated": "2026-11-23 09:27"};
 document.getElementById('info').innerHTML=`<span>마지막 업데이트 <b>${INFO.updated}</b></span><span>버전 <b>v${INFO.ver}</b></span><span title="${INFO.client_note}">클라이언트 <b>${INFO.client}</b></span><span>클라이언트 업데이트 <b>${INFO.client_patch}</b></span><span>제작자 : <b>돼</b></span>`;
+// 11/23 사용자: 들어올 때마다 닉네임 확인 화면 (게시판·랭킹이 같은 닉네임 사용)
+const NK='site_nick',getN=()=>{try{return localStorage.getItem(NK)||''}catch(e){return''}};
+function drawWho(){const n=getN();document.getElementById('who').innerHTML=n?`👤 <b>${n.replace(/</g,'&lt;')}</b>`:'👤 닉네임 없음';}
+function enter(n){try{if(n!=null)localStorage.setItem(NK,n)}catch(e){}document.getElementById('login').style.display='none';drawWho();}
+document.getElementById('lgNick').value=getN();
+document.getElementById('lgGo').onclick=()=>{const n=document.getElementById('lgNick').value.trim();if(!n){document.getElementById('lgNick').focus();return}enter(n)};
+document.getElementById('lgNick').onkeydown=e=>{if(e.key==='Enter')document.getElementById('lgGo').click()};
+document.getElementById('lgSkip').onclick=()=>enter(null);
+document.getElementById('who').onclick=()=>{document.getElementById('login').style.display='flex';document.getElementById('lgNick').focus()};
+setTimeout(()=>document.getElementById('lgNick').focus(),50);
 addEventListener('hashchange',show); show();
 </script>
 </body></html>
