@@ -574,7 +574,7 @@ function drawRk(){const esc=t=>String(t??'').replace(/</g,'&lt;');let h='<style>
     for(let i=0;i<5;i++){const r=top[i];
       if(!r){h+=`<tr><td>${i+1}</td><td style="color:var(--dim)">----</td><td class="n" style="color:var(--dim)">----</td><td class="n" style="color:var(--dim)">----</td><td class="n" style="color:var(--dim)">----</td></tr>`;continue}
       const id=c+'_'+i,v=(+r[c]).toLocaleString('ko-KR',{minimumFractionDigits:2,maximumFractionDigits:2});
-      h+=`<tr class="rr" data-rk="${c}" data-i="${i}"><td><b>${i+1}</b></td><td><b>${esc(r.nick)}</b></td><td class="n">${r.mypw?fmt(r.mypw/1000)+'K':'—'}</td><td class="n"><b>${v}</b></td><td class="n">${Math.round(+r[c]*60).toLocaleString('ko-KR')}</td></tr>`;
+      h+=`<tr class="rr" data-rk="${c}" data-i="${i}"><td><b>${1+top.filter(q=>Math.round((+q[c]||0)*100)>Math.round((+r[c]||0)*100)).length}</b></td><td><b>${esc(r.nick)}</b></td><td class="n">${r.mypw?fmt(r.mypw/1000)+'K':'—'}</td><td class="n"><b>${v}</b></td><td class="n">${Math.round(+r[c]*60).toLocaleString('ko-KR')}</td></tr>`;
       if(RK_OPEN===id)h+=`<tr class="dt"><td></td><td colspan="4" style="white-space:normal;text-align:left;line-height:1.6">📍 <b>${esc(r.zone)}</b> (몬스터 전투력 ${r.mon_pw?fmt(r.mon_pw/1000)+'K':'—'})<br>전투력 <b>${r.mypw?fmt(r.mypw/1000)+'K':'—'}</b> · 공격력 <b>${r.atk?fmt(r.atk,1)+'K':'—'}</b> · 방어력 <b>${r.def?fmt(r.def,1)+'K':'—'}</b> · 분당 처치 ${(+r.kpm||0).toLocaleString('ko-KR',{maximumFractionDigits:2})} <button class="btn rkcmp" data-rk="${c}" data-i="${i}" style="padding:2px 8px;font-size:11.5px;margin-left:4px">기록 비교에 넣기</button></td></tr>`;}
     h+='</tbody></table>';RK_TOP[c]=top;}
   $('rkBox').innerHTML=h;}
