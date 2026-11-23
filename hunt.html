@@ -160,7 +160,7 @@ details.how summary,details.allx>summary{padding:6px 0}
     #lp .f4 input{width:100%;padding:5px 6px;box-sizing:border-box;margin-top:1px}#lp .kc{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:6px;align-items:end}
     #kpi.kpi{gap:4px;margin:6px 0 0}#kpi.kpi div{padding:3px 8px;border-radius:7px}#kpi.kpi b{display:inline;font-size:13.5px}#kpi.kpi span{font-size:11.5px;margin-right:4px}</style>
     <div id="lp">
-    <select id="cur" style="width:100%;display:none"></select><!-- 11/23 사용자: 필요 없어 숨김 (사냥터는 기록 비교·폴더 탭에서 고름) -->
+    <select id="cur" style="width:100%;display:none"></select><!-- 11/23 사용자: 전체 목록 대신 내 사냥터 목록 --><select id="mysel" style="width:100%"></select>
     <div class="f4" style="grid-template-columns:repeat(3,minmax(0,1fr))"><label>공격력 K<input id="atk" type="number" step="0.1" placeholder="40.8"></label><label>방어력 K<input id="def" type="number" step="0.1" placeholder="12"></label><label>전투력 K<input id="mypw" type="number" step="1" placeholder="520"></label></div>
     <div id="kcalc" style="background:#F6F8FC;border:1px solid var(--line);border-radius:8px;padding:6px 8px;margin:0 0 6px">
       <div class="kc f4" style="margin:0"><label>처치 수<input id="kcN" type="number" min="0" placeholder="3650"></label><label>시간<input id="kcH" type="number" min="0" placeholder="0"></label><label>분<input id="kcM" type="number" min="0" placeholder="30"></label><label>초<input id="kcS" type="number" min="0" placeholder="0"></label></div>
@@ -382,7 +382,9 @@ let MYOPEN=-1;
 function drawTabs(){const t=$('mytabs');if(!t)return;const ck=Z[+$('cur').value]?key(Z[+$('cur').value]):'';
   t.innerHTML=MY.length?MY.map((m,i)=>`<div class="ftab ${m.key===ck?'on':''}" data-myi="${i}" title="${m.key} · 분당 ${m.k}마리 — 누르면 이 사냥터로 + 정보 펼치기">${i===MYOPEN?'📂':'📁'} ${mainOf()===m?'👑 ':''}${m.key}<small>${m.k}</small></div>`).join('')
    :'<div class="empty">📁 사냥터를 등록하면 여기 탭으로 생겨요</div>';}
-function renderMy(){sv('myspots',MY);drawTabs();
+function drawMySel(){const e=$('mysel');if(!e)return;const ck=Z[+$('cur').value]?key(Z[+$('cur').value]):'',mm=mainOf();
+  e.innerHTML=MY.length?(MY.some(m=>m.key===ck)?'':'<option value="-1">📁 내 사냥터 고르기</option>')+MY.map((m,i)=>`<option value="${i}" ${m.key===ck?'selected':''}>${mm===m?'👑 ':''}${m.key.replace(/</g,'&lt;')} · 분당 ${m.k}</option>`).join(''):'<option value="-1">📁 등록한 사냥터가 없어요 — 아래 「⭐ 사냥터 등록」 또는 기록 비교에서 등록</option>';}
+function renderMy(){sv('myspots',MY);drawTabs();drawMySel();
   document.querySelectorAll('#recs .rget').forEach(e=>{e.innerHTML='<option value="">📁 가져오기</option>'+MY.map((m,i)=>`<option value="${i}">${m.key} · 분당 ${m.k}</option>`).join('')});
   $('myspots').innerHTML=MY.length&&MY[MYOPEN]?MY.map((m,i)=>{if(i!==MYOPEN)return '';const zi=zIdx(m.key),z=Z[zi];const pw=z?z.pw:m.pw;
     const its=z?MY_IT.map(([k,n,d])=>{const v=amt(z,k)*m.k*60;return v>0?`<span style="display:inline-block;margin:2px 10px 0 0">${n} <b>${fq(v,d)}</b></span>`:''}).join(''):'<small>사냥터 정보 없음</small>';
@@ -404,6 +406,7 @@ function mainOf(){if(!MY.length||ld('main',null)==='__none__')return null;if(MY.
 $('delmain').onclick=e=>{if(!mainOf()){alert('메인 사냥터가 없어요');return}if(!confirm('메인 사냥터를 해제할까요? 랭킹에서 빠져요 (등록한 사냥터는 그대로)'))return;sv('main','__none__');renderMy();if(typeof pushMain==='function')pushMain()};
 $('setmain').onclick=e=>{const zi=+$('cur').value,z=Z[zi];if(!z)return;const k=key(z);if(!MY.some(m=>m.key===k))regCur();
   sv('main',k);renderMy();if(typeof pushMain==='function')pushMain();const b=e.currentTarget;b.textContent='✔ 메인 지정됨';setTimeout(()=>b.textContent='👑 메인 사냥터 지정',1200);};
+$('mysel').onchange=e=>{const ii=+e.target.value,m=MY[ii];if(!m)return;MYOPEN=ii;renderMy();if(m.atk)$('atk').value=K_(m.atk);if(m.def)$('def').value=K_(m.def);if(m.mp)$('mypw').value=+m.mp>=10000?+m.mp/1000:m.mp;toCur(zIdx(m.key),m.k);markReg();render();drawMySel()};
 $('mytabs').onclick=e=>{const c=e.target.closest('[data-myi]');if(!c)return;const ii=+c.dataset.myi;MYOPEN=MYOPEN===ii?-1:ii;renderMy();const m=MY[ii];if(m.atk)$('atk').value=K_(m.atk);if(m.def)$('def').value=K_(m.def);if(m.mp)$('mypw').value=+m.mp>=10000?+m.mp/1000:m.mp;toCur(zIdx(m.key),m.k);markReg();render()};
 $('myspots').onclick=e=>{const b=e.target.closest('[data-myx]');if(b){MY.splice(+b.dataset.myx,1);MYOPEN=-1;renderMy();if(typeof pushMain==='function')pushMain();return}const c=e.target.closest('[data-myi]');if(c){const m=MY[+c.dataset.myi];if(m.atk)$('atk').value=K_(m.atk);if(m.def)$('def').value=K_(m.def);if(m.mp)$('mypw').value=+m.mp>=10000?+m.mp/1000:m.mp;toCur(zIdx(m.key),m.k);markReg();render()}};
 $('loadrec').onclick=()=>{const L=MY.map(m=>({z:zIdx(m.key),k:m.k})).filter(r=>r.z>=0);if(!L.length)return;RECS=L;
