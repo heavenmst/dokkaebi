@@ -560,18 +560,18 @@ const sb=(path,opt={})=>fetch(SUPA.url.replace(/\/$/,'')+'/rest/v1/'+path,Object
 function drawRkTabs(){$('rkTabs').innerHTML=RK_IT.map(([c,n])=>`<button class="btn" data-rk="${c}" style="${c===RK_SEL?'background:var(--acc);color:#fff;border-color:var(--acc)':''}">분당 ${n}</button>`).join('');}
 async function loadRk(){if(!SUPA.url){$('rkBox').innerHTML='<div style="color:var(--dim)">랭킹 준비 중이에요 (공용 저장소 연결 전)</div>';return}
   try{const r=await sb('ranks?select=*&order=id.desc&limit=1000');if(!r.ok)throw new Error(r.status);RK_ROWS=await r.json();drawRk()}catch(e){RK_ROWS=[];drawRk();$('rkBox').insertAdjacentHTML('afterbegin','<div style="color:var(--dn);font-size:12px">랭킹을 못 불러왔어요 ('+e.message+')</div>')}}
-// 11/23 사용자: 엽전/요혼석/정기단 순으로 5명씩 (모자라면 ----) · 닉·사냥터·획득량 · 누르면 전투력·공·방
+// 11/23 사용자: 일일 비경([비경]) 제외 · 닉·전투력·분당·시간당, 누르면 사냥터·몬스터 전투력·공·방 / 엽전/요혼석/정기단 순으로 5명씩 (모자라면 ----) · 닉·사냥터·획득량 · 누르면 전투력·공·방
 let RK_OPEN=null;
 function drawRk(){const esc=t=>String(t??'').replace(/</g,'&lt;');let h='<style>#rkBox .rkt{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:8px}#rkBox .rkt th{background:var(--soft);text-align:left;padding:4px 6px;font-size:12px}#rkBox .rkt td{padding:4px 6px;border-top:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px}#rkBox .rkt td.n{text-align:right}#rkBox tr.rr{cursor:pointer}#rkBox tr.rr:hover td{background:#F3F6FC}#rkBox tr.dt td{background:#F8FAFD;color:var(--sub);font-size:12px;white-space:normal}</style>';
   for(const [c,n,,d] of RK_IT){const seen=new Set(),top=[];
-    const last={};(RK_ROWS||[]).forEach(r=>{if(!last[r.nick]||r.id>last[r.nick].id)last[r.nick]=r});   // 11/23 사용자: 한 사람당 마지막으로 올린 사냥터 1개만
+    const last={};(RK_ROWS||[]).filter(r=>!String(r.zone||'').startsWith('[비경]')).forEach(r=>{if(!last[r.nick]||r.id>last[r.nick].id)last[r.nick]=r});   // 11/23 사용자: 한 사람당 마지막으로 올린 사냥터 1개만
     for(const r of Object.values(last).filter(r=>(r[c]||0)>0).sort((a,b)=>(b[c]||0)-(a[c]||0))){if(seen.has(r.nick))continue;seen.add(r.nick);top.push(r);if(top.length>=5)break}
-    h+=`<table class="rkt"><thead><tr><th style="width:24px">#</th><th>닉네임</th><th>사냥터</th><th style="text-align:right">분당 ${n}</th></tr></thead><tbody>`;
+    h+=`<table class="rkt"><thead><tr><th style="width:24px">#</th><th>닉네임</th><th style="text-align:right">전투력</th><th style="text-align:right">분당 ${n}</th><th style="text-align:right">시간당</th></tr></thead><tbody>`;
     for(let i=0;i<5;i++){const r=top[i];
-      if(!r){h+=`<tr><td>${i+1}</td><td style="color:var(--dim)">----</td><td style="color:var(--dim)">----</td><td class="n" style="color:var(--dim)">----</td></tr>`;continue}
+      if(!r){h+=`<tr><td>${i+1}</td><td style="color:var(--dim)">----</td><td class="n" style="color:var(--dim)">----</td><td class="n" style="color:var(--dim)">----</td><td class="n" style="color:var(--dim)">----</td></tr>`;continue}
       const id=c+'_'+i,v=(+r[c]).toLocaleString('ko-KR',{minimumFractionDigits:2,maximumFractionDigits:2});
-      h+=`<tr class="rr" data-rk="${c}" data-i="${i}"><td><b>${i+1}</b></td><td><b>${esc(r.nick)}</b></td><td title="${esc(r.zone)}">${esc(r.zone)}</td><td class="n"><b>${v}</b></td></tr>`;
-      if(RK_OPEN===id)h+=`<tr class="dt"><td></td><td colspan="3">전투력 <b>${r.mypw?fmt(r.mypw/1000)+'K':'—'}</b> · 공격력 <b>${r.atk?fmt(r.atk,1)+'K':'—'}</b> · 방어력 <b>${r.def?fmt(r.def,1)+'K':'—'}</b> · 분당 처치 ${(+r.kpm||0).toLocaleString('ko-KR',{maximumFractionDigits:2})} · 몬스터 ${r.mon_pw?fmt(r.mon_pw/1000)+'K':'—'} <button class="btn rkcmp" data-rk="${c}" data-i="${i}" style="padding:2px 8px;font-size:11.5px;margin-left:4px">기록 비교에 넣기</button></td></tr>`;}
+      h+=`<tr class="rr" data-rk="${c}" data-i="${i}"><td><b>${i+1}</b></td><td><b>${esc(r.nick)}</b></td><td class="n">${r.mypw?fmt(r.mypw/1000)+'K':'—'}</td><td class="n"><b>${v}</b></td><td class="n">${Math.round(+r[c]*60).toLocaleString('ko-KR')}</td></tr>`;
+      if(RK_OPEN===id)h+=`<tr class="dt"><td></td><td colspan="4" style="white-space:normal">📍 <b>${esc(r.zone)}</b> (몬스터 전투력 ${r.mon_pw?fmt(r.mon_pw/1000)+'K':'—'})<br>전투력 <b>${r.mypw?fmt(r.mypw/1000)+'K':'—'}</b> · 공격력 <b>${r.atk?fmt(r.atk,1)+'K':'—'}</b> · 방어력 <b>${r.def?fmt(r.def,1)+'K':'—'}</b> · 분당 처치 ${(+r.kpm||0).toLocaleString('ko-KR',{maximumFractionDigits:2})} <button class="btn rkcmp" data-rk="${c}" data-i="${i}" style="padding:2px 8px;font-size:11.5px;margin-left:4px">기록 비교에 넣기</button></td></tr>`;}
     h+='</tbody></table>';RK_TOP[c]=top;}
   $('rkBox').innerHTML=h;}
 const RK_TOP={};
