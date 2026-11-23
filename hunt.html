@@ -351,7 +351,7 @@ function renderCmp(){
     if(!vals.some(v=>v>0))continue;
     const col=(GCAT[c]||GCAT['기타'])[1];
     if(c!==lastCat){lastCat=c;h+=`<tr><td colspan="${R.length+1}" style="text-align:left;padding:10px 8px 4px;font-weight:700;color:${col};border-bottom:2px solid ${col};border-left:4px solid ${col}">${(GCAT[c]||GCAT['기타'])[0]}</td></tr>`}
-    h+=`<tr><td class="l" style="border-left:4px solid ${col};padding-left:8px">${icoTag(k)}<b>${n}</b></td>${vals.map((v,j)=>`<td class="cmpv"><b>${fq(v,d)}</b>${j?pct(v,vals[0]):''}<small>분당 ${fq(v/60,d+1)}</small>${(k.startsWith('만귀령패')||k==='조화단')?per1(v):''}</td>`).join('')}</tr>`;
+    h+=`<tr><td class="l" style="border-left:4px solid ${col};padding-left:8px">${icoTag(k)}<b>${n}</b></td>${vals.map((v,j)=>`<td class="cmpv"><b>${fq(v,d)}</b>${j?pct(v,vals[0]):''}${j&&vals[0]&&v&&Math.abs(v-vals[0])>=Math.pow(10,-d)/2?`<span style="display:block;font-size:11.5px;font-weight:700;color:${v>vals[0]?'var(--up)':'var(--dn)'}">${v>vals[0]?'+':'−'}${fq(Math.abs(v-vals[0]),d)}</span>`:''}<small>분당 ${fq(v/60,d+1)}</small>${(k.startsWith('만귀령패')||k==='조화단')?per1(v):''}</td>`).join('')}</tr>`;
   }
   h+='</tbody>';
   // 11/23 사용자: 기록 비교 표는 👑 메인 사냥터가 정해져야 보임
