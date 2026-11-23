@@ -467,7 +467,7 @@ guardSel();renderRecs();render();$('msel').value=ld('msel',Z[+$('cur').value].mk
 </script><div id="zpop" onclick="if(event.target===this)zpclose()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:50;align-items:center;justify-content:center;padding:16px"><div id="zpbody" style="background:var(--card,#fff);color:inherit;border-radius:12px;padding:18px 20px;max-width:520px;width:100%;max-height:85vh;overflow:auto;box-shadow:0 10px 40px rgba(0,0,0,.4)"></div></div>
 <script>
 // ───── 11/23 사용자: 사냥 랭킹 (Supabase 공용 저장소) ─────
-const SUPA={"url":"","key":""};
+const SUPA={"url":"https://ibzlvxjzgdbrnuydqrym.supabase.co","key":"sb_publishable_G37kFCD1FyTo6tCNaaAh-w_xObz5L88"};
 const RK_IT=[['yeop','엽전','엽전',0],['yohon','요혼석','요혼석',1],['jeonggi','정기단','정기단',2]];
 let RK_SEL=ld('rksel','yeop'),RK_ROWS=null;
 const sb=(path,opt={})=>fetch(SUPA.url.replace(/\/$/,'')+'/rest/v1/'+path,Object.assign({},opt,{headers:Object.assign({apikey:SUPA.key,Authorization:'Bearer '+SUPA.key,'Content-Type':'application/json'},opt.headers||{})}));
