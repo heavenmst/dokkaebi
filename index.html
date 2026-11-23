@@ -30,7 +30,7 @@ iframe.on{display:block}
 </style></head><body>
 <div id="login"><div class="box"><h1>도깨비의 세계 <span>- 몽련1 연문파</span></h1><div style="color:var(--sub);font-size:13px">사냥터 효율 · 도술 DPS · 성장 목표 · 금전시세</div>
  <div class="tip">📌 <b>참고용으로만 봐 주세요.</b><br>게임 클라이언트 자료로 계산했지만 실제 게임과 다르거나 틀린 부분이 있을 수 있어요. 이상한 점은 「건의 · 수정 · 요청」에 남겨 주세요.</div>
- <input id="lgNick" maxlength="20" placeholder="인게임 닉네임을 입력해 주세요!" autocomplete="nickname"><button id="lgGo">입장하기</button></div></div>
+ <input id="lgNick" maxlength="20" placeholder="인게임 닉네임을 입력해 주세요!" autocomplete="nickname"><input id="lgPw" type="password" maxlength="2" placeholder="비밀번호 2글자 (처음이면 지금 정한 걸로 등록)" autocomplete="off"><div id="lgMsg" style="min-height:18px;font-size:13px;margin:-2px 0 8px"></div><button id="lgGo">입장하기</button></div></div>
 <header><div class="bar">
  <div class="logo">도깨비의 세계 <span>- 몽련1 연문파</span></div>
  <nav>
@@ -59,17 +59,44 @@ function show(){
   document.querySelector(`nav a[data-t="${k}"]`).classList.toggle('on',on);});
  document.title={hunt:'사냥터 효율',dps:'도술 DPS',growth:'성장 목표',salvage:'금전시세 / 분해 계산',board:'건의 · 수정 · 요청'}[t]+' · 도깨비의 세계 - 몽련1 연문파';
 }
-const INFO={"client": "도깨비의 세계 PC 클라이언트 (Unity 6000.3)", "client_patch": "2026-11-18 대격변 패치", "client_note": "드랍표·도술 수치·지도 = 이 패치 클라이언트에서 직접 추출", "ver": "1.67", "updated": "2026-11-23 09:45"};
+const INFO={"client": "도깨비의 세계 PC 클라이언트 (Unity 6000.3)", "client_patch": "2026-11-18 대격변 패치", "client_note": "드랍표·도술 수치·지도 = 이 패치 클라이언트에서 직접 추출", "ver": "1.68", "updated": "2026-11-23 09:46"};
 document.getElementById('info').innerHTML=`<span>마지막 업데이트 <b>${INFO.updated}</b></span><span>버전 <b>v${INFO.ver}</b></span><span title="${INFO.client_note}">클라이언트 <b>${INFO.client}</b></span><span>클라이언트 업데이트 <b>${INFO.client_patch}</b></span><span>제작자 : <b>돼</b></span>`;
 // 11/23 사용자: 들어올 때마다 닉네임 확인 화면 (게시판·랭킹이 같은 닉네임 사용)
 const NK='site_nick',getN=()=>{try{return localStorage.getItem(NK)||''}catch(e){return''}};
 function drawWho(){const n=getN();document.getElementById('who').innerHTML=n?`👤 <b>${n.replace(/</g,'&lt;')}</b>`:'👤 닉네임 없음';}
 function enter(n){try{if(n!=null)localStorage.setItem(NK,n)}catch(e){}document.getElementById('login').style.display='none';drawWho();}
-document.getElementById('lgNick').value=getN();
-document.getElementById('lgGo').onclick=()=>{const n=document.getElementById('lgNick').value.trim();if(!n){document.getElementById('lgNick').focus();return}enter(n)};
-document.getElementById('lgNick').onkeydown=e=>{if(e.key==='Enter')document.getElementById('lgGo').click()};
-document.getElementById('who').onclick=()=>{document.getElementById('login').style.display='flex';document.getElementById('lgNick').focus()};
-setTimeout(()=>document.getElementById('lgNick').focus(),50);
+// 11/23 두 글자 비밀번호 (Supabase RPC site_login, 비밀번호는 저장 안 함)
+const SUPA={url:'https://ibzlvxjzgdbrnuydqrym.supabase.co',key:'sb_publishable_G37kFCD1FyTo6tCNaaAh-w_xObz5L88'};
+const $id=i=>document.getElementById(i);
+function lgMsg(t,c){const m=$id('lgMsg');m.textContent=t||'';m.style.color=c||'var(--sub)';}
+function focusLogin(){const nk=$id('lgNick');(nk.value.trim()?$id('lgPw'):nk).focus();}
+let lgBusy=false;
+async function tryLogin(){
+ if(lgBusy)return;
+ const n=$id('lgNick').value.trim(),p=$id('lgPw').value;
+ if(!n){lgMsg('닉네임을 입력해 주세요','#D33');$id('lgNick').focus();return}
+ if([...p].length!==2){lgMsg('비밀번호는 정확히 2글자예요','#D33');$id('lgPw').focus();return}
+ lgBusy=true;$id('lgGo').disabled=true;lgMsg('확인 중…');
+ let r;
+ try{
+  const res=await fetch(`${SUPA.url}/rest/v1/rpc/site_login`,{method:'POST',headers:{apikey:SUPA.key,Authorization:'Bearer '+SUPA.key,'Content-Type':'application/json'},body:JSON.stringify({p_nick:n,p_pw:p})});
+  if(!res.ok)throw new Error('HTTP '+res.status);
+  r=await res.json();
+ }catch(e){r=null}
+ lgBusy=false;$id('lgGo').disabled=false;
+ if(r==='ok'){$id('lgPw').value='';lgMsg('');enter(n);}
+ else if(r==='new'){$id('lgPw').value='';lgMsg('등록됐어요','#1A8F3C');setTimeout(()=>{enter(n);lgMsg('')},900);}
+ else if(r==='bad'){lgMsg('비밀번호가 달라요','#D33');$id('lgPw').value='';$id('lgPw').focus();}
+ else if(r==='badnick'){lgMsg('닉네임을 확인해 주세요 (사용할 수 없는 닉네임)','#D33');$id('lgNick').focus();}
+ else if(r==='badpw'){lgMsg('비밀번호는 정확히 2글자로 정해 주세요','#D33');$id('lgPw').focus();}
+ else{lgMsg('서버 연결 실패 — 잠시 후 다시','#D33');}
+}
+$id('lgNick').value=getN();
+$id('lgGo').onclick=tryLogin;
+$id('lgNick').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();$id('lgPw').value?tryLogin():$id('lgPw').focus()}};
+$id('lgPw').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();tryLogin()}};
+$id('who').onclick=()=>{$id('login').style.display='flex';$id('lgPw').value='';lgMsg('');focusLogin()};
+setTimeout(focusLogin,50);
 addEventListener('hashchange',show); show();
 </script>
 </body></html>
