@@ -50,7 +50,7 @@ nav svg{width:16px;height:16px}
 </style></head><body>
 <div id="login"><div class="box"><h1>도깨비의 세계 <span>- 몽련1 연문파</span></h1><div style="color:var(--sub);font-size:13px">사냥터 효율 · 도술 DPS · 성장 목표 · 금전시세</div>
  <div class="tip">📌 <b>참고용으로만 봐 주세요.</b><br>게임 클라이언트 자료로 계산했지만 실제 게임과 다르거나 틀린 부분이 있을 수 있어요. 이상한 점은 「건의 · 수정 · 요청」에 남겨 주세요.</div>
- <input id="lgNick" maxlength="20" placeholder="인게임 닉네임을 입력해 주세요!" autocomplete="nickname"><input id="lgPw" type="password" maxlength="2" placeholder="비밀번호 2글자 (처음이면 지금 정한 걸로 등록)" autocomplete="off"><div id="lgMsg" style="min-height:18px;font-size:13px;margin:-2px 0 8px"></div><button id="lgGo">입장하기</button></div></div>
+ <div style="font-size:13px;font-weight:700;color:#1F5EFF;margin:0 0 6px;text-align:left">⚠ 닉네임은 꼭 <u>인게임 닉네임</u>으로 적어 주세요 (랭킹·게시판에 그대로 보여요)</div><input id="lgNick" maxlength="20" placeholder="인게임 닉네임을 입력해 주세요!" autocomplete="nickname"><input id="lgPw" type="password" maxlength="2" placeholder="비밀번호 2글자 (처음이면 지금 정한 걸로 등록)" autocomplete="off"><div id="lgMsg" style="min-height:18px;font-size:13px;margin:-2px 0 8px"></div><button id="lgGo">입장하기</button></div></div>
 <header><div class="bar">
  <div class="logo">도깨비의 세계 <span>- 몽련1 연문파</span></div>
  <nav>
@@ -79,7 +79,7 @@ function show(){
   document.querySelector(`nav a[data-t="${k}"]`).classList.toggle('on',on);});
  document.title={hunt:'사냥터 효율',dps:'도술 DPS',growth:'성장 목표',salvage:'금전시세 / 분해 계산',board:'건의 · 수정 · 요청'}[t]+' · 도깨비의 세계 - 몽련1 연문파';
 }
-const INFO={"client": "도깨비의 세계 PC 클라이언트 (Unity 6000.3)", "client_patch": "2026-11-18 대격변 패치", "client_note": "드랍표·도술 수치·지도 = 이 패치 클라이언트에서 직접 추출", "ver": "1.122", "updated": "2026-11-23 11:32"};
+const INFO={"client": "도깨비의 세계 PC 클라이언트 (Unity 6000.3)", "client_patch": "2026-11-18 대격변 패치", "client_note": "드랍표·도술 수치·지도 = 이 패치 클라이언트에서 직접 추출", "ver": "1.123", "updated": "2026-11-23 11:33"};
 document.getElementById('info').innerHTML=`<span>마지막 업데이트 <b>${INFO.updated}</b></span><span>버전 <b>v${INFO.ver}</b></span><span title="${INFO.client_note}">클라이언트 <b>${INFO.client}</b></span><span>클라이언트 업데이트 <b>${INFO.client_patch}</b></span><span>제작자 : <b>돼</b></span>`;
 // 11/23 사용자: 들어올 때마다 닉네임 확인 화면 (게시판·랭킹이 같은 닉네임 사용)
 const NK='site_nick',getN=()=>{try{return localStorage.getItem(NK)||''}catch(e){return''}};

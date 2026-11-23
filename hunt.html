@@ -168,7 +168,7 @@ details.how summary,details.allx>summary{padding:6px 0}
       <div style="display:flex;align-items:center;gap:6px;margin-top:3px;font-size:12px"><span id="kcR" style="flex:1"></span><span style="color:var(--dim);white-space:nowrap">10분 이상 · 30분 추천</span></div>
     </div>
     <div class="row" style="display:none"><label>이득 기준</label><select id="basis"></select></div>
-    <button id="regcur" class="btn" style="white-space:nowrap;padding:5px 12px" title="지금 값으로 사냥터 등록하고 결과 보기">⭐ 사냥터 등록</button> <button id="setmain" class="btn" style="white-space:nowrap;padding:5px 12px" title="지금 사냥터를 메인으로 — 랭킹·성장 목표에 쓰임 (등록 1개면 자동으로 메인)">👑 메인 사냥터 지정</button>
+    <button id="regcur" class="btn" style="white-space:nowrap;padding:5px 12px" title="지금 값으로 사냥터 등록하고 결과 보기">⭐ 사냥터 등록</button> <button id="setmain" class="btn" style="white-space:nowrap;padding:5px 12px" title="지금 사냥터를 메인으로 — 랭킹·성장 목표에 쓰임 (등록 1개면 자동으로 메인)">👑 메인 사냥터 지정</button><button id="delmain" class="btn" style="white-space:nowrap;padding:5px 12px" title="메인 사냥터 해제 — 랭킹에서 빠짐 (등록한 사냥터 목록은 그대로)">🗑 메인 삭제</button>
     <div class="kpi" id="kpi"></div>
     <div id="myspots"></div>
     </div>
@@ -400,7 +400,8 @@ function regCur(btn){const zi=+$('cur').value,z=Z[zi];if(!z)return;const d=new D
   renderMy();markReg();render();if(btn){btn.textContent='✔ 등록됨';setTimeout(()=>btn.textContent='⭐ 사냥터 등록',1000)}}
 $('regcur').onclick=e=>{regCur(e.currentTarget);if(typeof pushMain==='function')pushMain()};
 // 11/23 사용자: 👑 메인 사냥터 — 등록 1개면 그게 메인, 여러 개면 지정한 곳 (랭킹 자동 + 성장 목표 자동에 쓰임)
-function mainOf(){if(!MY.length)return null;if(MY.length===1)return MY[0];const mk=ld('main',null);return MY.find(m=>m.key===mk)||null;}
+function mainOf(){if(!MY.length||ld('main',null)==='__none__')return null;if(MY.length===1)return MY[0];const mk=ld('main',null);return MY.find(m=>m.key===mk)||null;}
+$('delmain').onclick=e=>{if(!mainOf()){alert('메인 사냥터가 없어요');return}if(!confirm('메인 사냥터를 해제할까요? 랭킹에서 빠져요 (등록한 사냥터는 그대로)'))return;sv('main','__none__');renderMy();if(typeof pushMain==='function')pushMain()};
 $('setmain').onclick=e=>{const zi=+$('cur').value,z=Z[zi];if(!z)return;const k=key(z);if(!MY.some(m=>m.key===k))regCur();
   sv('main',k);renderMy();if(typeof pushMain==='function')pushMain();const b=e.currentTarget;b.textContent='✔ 메인 지정됨';setTimeout(()=>b.textContent='👑 메인 사냥터 지정',1200);};
 $('mytabs').onclick=e=>{const c=e.target.closest('[data-myi]');if(!c)return;const ii=+c.dataset.myi;MYOPEN=MYOPEN===ii?-1:ii;renderMy();const m=MY[ii];if(m.atk)$('atk').value=K_(m.atk);if(m.def)$('def').value=K_(m.def);if(m.mp)$('mypw').value=+m.mp>=10000?+m.mp/1000:m.mp;toCur(zIdx(m.key),m.k);markReg();render()};
@@ -581,11 +582,14 @@ $('rkBox').onclick=e=>{const b=e.target.closest('.rkcmp');if(b){const r=RK_TOP[b
 $('rkTabs').onclick=e=>{const b=e.target.closest('[data-rk]');if(!b)return;RK_SEL=b.dataset.rk;sv('rksel',RK_SEL);drawRkTabs();drawRk()};
 const RNICK=()=>{try{return localStorage.getItem('site_nick')||''}catch(e){return''}};const drawRN=()=>{$('rkNick').innerHTML=RNICK()?`닉네임 <b>${RNICK().replace(/</g,'&lt;')}</b>`:'<span style="color:var(--dn)">닉네임 없음 — 위쪽 👤을 눌러 정해 주세요</span>'};drawRN();addEventListener('storage',e=>{if(e.key==='site_nick')drawRN()});
 // 11/23 사용자: 「올리기」 버튼 없앰 → 👑 메인 사냥터(등록 1개면 그것)가 바뀌면 자동으로 랭킹에 올림 (닉네임마다 마지막 1개만 보임)
-async function pushMain(){const m=mainOf();drawMainInfo();if(!m)return;const nick=RNICK().trim();if(!nick||!SUPA.url)return;
+// 11/23 사용자: 메인 삭제 → 랭킹에서 빠지게 (닉네임마다 마지막 기록만 보이므로 0짜리 「해제」 기록을 올림)
+async function rkPost(row,okMsg){const nick=row.nick,sig=nick+'|'+JSON.stringify(row);if(ld('mainsent','')===sig)return;
+  $('rkMsg').textContent='랭킹 반영 중…';try{const r=await sb('ranks',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify(row)});if(!r.ok)throw new Error(r.status+' '+(await r.text()).slice(0,80));sv('mainsent',sig);$('rkMsg').textContent=okMsg;loadRk()}catch(e){$('rkMsg').textContent='랭킹 반영 실패: '+e.message}}
+async function pushMain(){const m=mainOf();drawMainInfo();const nick=RNICK().trim();if(!nick||!SUPA.url)return;
+  if(!m){const prev=ld('mainsent','');if(prev&&prev.startsWith(nick+'|')&&!prev.includes('(메인 해제)'))rkPost({nick,zone:'(메인 해제)',kpm:0,yeop:0,yohon:0,jeonggi:0},'✔ 랭킹에서 빠짐');return}
   const z=Z[zIdx(m.key)],k=+m.k||0;if(!z||!k)return;
   const row={nick,zone:m.key,mon_pw:z.pw||null,atk:+m.atk>=1000?+m.atk/1000:(+m.atk||null),def:+m.def>=1000?+m.def/1000:(+m.def||null),mypw:m.mp?(+m.mp>=10000?+m.mp:+m.mp*1000):null,kpm:k,yeop:amt(z,'엽전')*k,yohon:amt(z,'요혼석')*k,jeonggi:amt(z,'정기단')*k};
-  const sig=nick+'|'+JSON.stringify(row);if(ld('mainsent','')===sig)return;
-  $('rkMsg').textContent='랭킹에 올리는 중…';try{const r=await sb('ranks',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify(row)});if(!r.ok)throw new Error(r.status+' '+(await r.text()).slice(0,80));sv('mainsent',sig);$('rkMsg').textContent='✔ 랭킹 반영됨';loadRk()}catch(e){$('rkMsg').textContent='랭킹 올리기 실패: '+e.message}}
+  rkPost(row,'✔ 랭킹 반영됨')}
 function drawMainInfo(){const m=mainOf();if($('rkMain'))$('rkMain').innerHTML=m?`· 👑 메인 <b>${m.key.replace(/</g,'&lt;')}</b> 분당 ${m.k}`:'· <span style="color:var(--dim)">메인 사냥터 없음 — 「⭐ 사냥터 등록」 후 「👑 메인 사냥터 지정」</span>';}
 addEventListener('storage',e=>{if(e.key==='site_nick')pushMain()});
 pushMain();
