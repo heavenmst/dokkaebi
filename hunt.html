@@ -113,6 +113,14 @@ details.how{margin-top:6px}
     <h2>내 기준 사냥터</h2>
     <div class="row" style="grid-template-columns:1fr"><label>사냥터</label><select id="cur" style="width:100%"></select></div>
     <div class="row big"><label>분당 처치</label><input id="kpm" type="number" min="1" step="1" value="90"></div>
+    <div id="kcalc" style="background:#F6F8FC;border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:2px 0 8px">
+      <div style="font-weight:700;font-size:13px;margin-bottom:6px">분당 처치 계산기</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <label style="font-size:12px;color:var(--sub)">처치 수<input id="kcN" type="number" min="0" placeholder="예: 3650" style="width:100%"></label>
+        <label style="font-size:12px;color:var(--sub)">걸린 시간<input id="kcT" placeholder="예: 12:30:50" style="width:100%;padding:5px 6px;border:1px solid var(--line2);border-radius:8px"></label></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:6px"><span id="kcR" style="flex:1;font-size:13px"></span><button id="kcGo" class="btn" style="padding:5px 10px">분당 처치에 넣기</button></div>
+      <div style="font-size:11.5px;color:var(--dim);margin-top:4px">시간은 시:분:초 / 분:초 / 분 (예: 12:30:50 · 30:00 · 30). <b>최소 10분 이상</b> 재야 하고, <b>30분을 추천</b>해요 — 짧으면 리젠·이동 때문에 숫자가 들쭉날쭉해요.</div>
+    </div>
     <div class="row" style="display:none"><label>이득 기준</label><select id="basis"></select></div>
     <div class="row"><label>내 공격력 <small>K 단위 · 4만 = 40</small></label><input id="atk" type="number" step="0.1" placeholder="예: 40.8"></div>
     <div class="row"><label>내 방어력 <small>K 단위</small></label><input id="def" type="number" step="0.1" placeholder="예: 12"></div>
@@ -455,6 +463,12 @@ function renderMon(){
     return `<div class="sec" ${AR[s]?`id="sec-${AR[s].l}" style="border-left:4px solid ${AR[s].c}"`:''}><h3>${AR[s]?`<b class="ab" style="background:${AR[s].c}">${AR[s].l}</b>`:''}${s}${secPw(n,s)?`<span class="pwc">전투력 ${secPw(n,s)}</span>`:''}<span class="n">${sum}마리 · ${(P[s]||[]).length}묶음</span></h3>${mixbar(t)}${packs||L.map(([m,a,c])=>`<div class="mon"><i class="at a-${a}">${a}</i>${m.replace(n+' ','')}<span class="c">${c}</span></div>`).join('')}</div>`}).join('');
 }
 drawNeedIts();
+// 11/23 사용자: 처치 수 ÷ 걸린 시간 → 분당 처치
+function kcSec(t){t=String(t||'').trim();if(!t)return 0;const p=t.split(/[:：]/).map(x=>parseFloat(x)||0);return p.length>=3?p[0]*3600+p[1]*60+p[2]:p.length===2?p[0]*60+p[1]:p[0]*60;}
+function kcCalc(){const n=+$('kcN').value||0,sec=kcSec($('kcT').value);if(!n||!sec){$('kcR').innerHTML='<span style="color:var(--dim)">처치 수와 시간을 넣으면 분당 처치가 나와요</span>';return 0}
+  const v=n/(sec/60),m=sec/60;$('kcR').innerHTML=`분당 <b style="font-size:15px">${v.toLocaleString('ko-KR',{maximumFractionDigits:1})}</b>마리 <span style="color:var(--dim)">(${Math.floor(m)}분 ${Math.round(sec%60)}초)</span>`+(m<10?' <b style="color:var(--dn)">· 10분 미만이라 부정확</b>':'');return v}
+['kcN','kcT'].forEach(id=>$(id).addEventListener('input',kcCalc));kcCalc();
+$('kcGo').onclick=()=>{const v=kcCalc();if(!v)return;$('kpm').value=Math.round(v*10)/10;$('kpm').dispatchEvent(new Event('change'));render();};
 addEventListener('storage',e=>{if(e.key==='hc_atk'){try{const v=K_(JSON.parse(e.newValue||'""'));if(String(v)!==$('atk').value){$('atk').value=v;render()}}catch(x){}}});   // 11/23 DPS 계산기 공격력과 연동
 ['cur','kpm','atk','def','basis','mypw','pwr','pwlo','pwhi'].forEach(id=>{$(id).oninput=render;$(id).onchange=render});
 $('cur').addEventListener('change',()=>{const z=Z[+$('cur').value],k=z.mk||z.z;if(M[k]){sv('sgl_'+k,-1);$('msel').value=k;renderMon()}});
