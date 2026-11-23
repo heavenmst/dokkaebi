@@ -1,6 +1,12 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>도깨비의 세계 - 몽련1 연문파</title>
+<meta name="description" content="제가 편하려고 만든 계산기, 선생님들도 같이 쓰세요! 사냥터 비교 · 도술 DPS 순위 · 성장 목표 · 금전 시세 · 분해 계산을 한곳에서. 고칠 점은 「건의 · 수정 · 요청」에 남겨 주세요.">
+<meta property="og:type" content="website"><meta property="og:site_name" content="도깨비의 세계">
+<meta property="og:title" content="도깨비의 세계 · 몽련1 연문파 계산기 모음">
+<meta property="og:description" content="제가 편하려고 만든 계산기, 선생님들도 같이 쓰세요! 사냥터 비교 · 도술 DPS 순위 · 성장 목표 · 금전 시세 · 분해 계산을 한곳에서. 고칠 점은 「건의 · 수정 · 요청」에 남겨 주세요.">
+<meta property="og:url" content="https://heavenmst.github.io/dokkaebi/"><meta property="og:image" content="https://heavenmst.github.io/dokkaebi/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="도깨비의 세계 · 몽련1 연문파 계산기 모음"><meta name="twitter:description" content="제가 편하려고 만든 계산기, 선생님들도 같이 쓰세요! 사냥터 비교 · 도술 DPS 순위 · 성장 목표 · 금전 시세 · 분해 계산을 한곳에서. 고칠 점은 「건의 · 수정 · 요청」에 남겨 주세요."><meta name="twitter:image" content="https://heavenmst.github.io/dokkaebi/og.png">
 <style>
 :root{--bg:#F6F7F9;--card:#FFFFFF;--line:#E3E6EB;--line2:#CBD0D8;--tx:#1F2429;--sub:#5B6472;--acc:#1F5EFF;--accbg:#EAF0FF}
 *{box-sizing:border-box}html,body{height:100%}
@@ -79,7 +85,7 @@ function show(){
   document.querySelector(`nav a[data-t="${k}"]`).classList.toggle('on',on);});
  document.title={hunt:'사냥터 효율',dps:'도술 DPS',growth:'성장 목표',salvage:'금전시세 / 분해 계산',board:'건의 · 수정 · 요청'}[t]+' · 도깨비의 세계 - 몽련1 연문파';
 }
-const INFO={"client": "도깨비의 세계 PC 클라이언트 (Unity 6000.3)", "client_patch": "2026-11-18 대격변 패치", "client_note": "드랍표·도술 수치·지도 = 이 패치 클라이언트에서 직접 추출", "ver": "1.131", "updated": "2026-11-23 11:45"};
+const INFO={"client": "도깨비의 세계 PC 클라이언트 (Unity 6000.3)", "client_patch": "2026-11-18 대격변 패치", "client_note": "드랍표·도술 수치·지도 = 이 패치 클라이언트에서 직접 추출", "ver": "1.132", "updated": "2026-11-23 11:49"};
 document.getElementById('info').innerHTML=`<span>마지막 업데이트 <b>${INFO.updated}</b></span><span>버전 <b>v${INFO.ver}</b></span><span title="${INFO.client_note}">클라이언트 <b>${INFO.client}</b></span><span>클라이언트 업데이트 <b>${INFO.client_patch}</b></span><span>제작자 : <b>돼</b></span>`;
 // 11/23 사용자: 들어올 때마다 닉네임 확인 화면 (게시판·랭킹이 같은 닉네임 사용)
 const NK='site_nick',getN=()=>{try{return localStorage.getItem(NK)||''}catch(e){return''}};
