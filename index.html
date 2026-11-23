@@ -85,7 +85,7 @@ function show(){
   document.querySelector(`nav a[data-t="${k}"]`).classList.toggle('on',on);});
  document.title={hunt:'사냥터 효율',dps:'도술 DPS',growth:'성장 목표',salvage:'금전시세 / 분해 계산',board:'건의 · 수정 · 요청'}[t]+' · 도깨비의 세계 - 몽련1 연문파';
 }
-const INFO={"client": "도깨비의 세계 PC 클라이언트 (Unity 6000.3)", "client_patch": "2026-11-18 대격변 패치", "client_note": "드랍표·도술 수치·지도 = 이 패치 클라이언트에서 직접 추출", "ver": "1.160", "updated": "2026-11-23 13:15"};
+const INFO={"client": "도깨비의 세계 PC 클라이언트 (Unity 6000.3)", "client_patch": "2026-11-18 대격변 패치", "client_note": "드랍표·도술 수치·지도 = 이 패치 클라이언트에서 직접 추출", "ver": "1.161", "updated": "2026-11-23 13:19"};
 document.getElementById('info').innerHTML=`<span>마지막 업데이트 <b>${INFO.updated}</b></span><span>버전 <b>v${INFO.ver}</b></span><span title="${INFO.client_note}">클라이언트 <b>${INFO.client}</b></span><span>클라이언트 업데이트 <b>${INFO.client_patch}</b></span><span>제작자 : <b>돼</b></span>`;
 // 11/23 사용자: 들어올 때마다 닉네임 확인 화면 (게시판·랭킹이 같은 닉네임 사용)
 const NK='site_nick',getN=()=>{try{return localStorage.getItem(NK)||''}catch(e){return''}};
@@ -107,6 +107,12 @@ function swapUser(prev,n){
 function enter(n){try{if(n!=null){const prev=getN();if(prev&&prev!==n)swapUser(prev,n);localStorage.setItem(NK,n)}}catch(e){}document.getElementById('login').style.display='none';drawWho();}
 // 11/23 두 글자 비밀번호 (Supabase RPC site_login, 비밀번호는 저장 안 함)
 const SUPA={url:'https://ibzlvxjzgdbrnuydqrym.supabase.co',key:'sb_publishable_G37kFCD1FyTo6tCNaaAh-w_xObz5L88'};
+// 11/23 운영자 전용 방문 기록 (화면엔 안 보임): 입장 닉네임·보는 탭을 1분마다 한 줄 → 하루 방문자·이용 시간 집계 (읽기는 운영자 비밀키 RPC만)
+(function(){let sid='';try{sid=sessionStorage.getItem('vsid')||'';if(!sid){sid=Math.random().toString(36).slice(2)+Date.now().toString(36);sessionStorage.setItem('vsid',sid)}}catch(e){sid=Math.random().toString(36).slice(2)}
+ const beat=()=>{try{if(document.visibilityState!=='visible')return;const nick=(localStorage.getItem('site_nick')||'').slice(0,20);if(!nick||document.getElementById('login').style.display!=='none')return;
+   const tab=((location.hash||'').slice(1)||'hunt').slice(0,20);
+   fetch(SUPA.url+'/rest/v1/visit_log',{method:'POST',headers:{apikey:SUPA.key,Authorization:'Bearer '+SUPA.key,'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({sid,nick,tab}),keepalive:true}).catch(()=>{});}catch(e){}};
+ setTimeout(beat,5000);setInterval(beat,60000);addEventListener('hashchange',()=>setTimeout(beat,1500));})();
 const $id=i=>document.getElementById(i);
 function lgMsg(t,c){const m=$id('lgMsg');m.textContent=t||'';m.style.color=c||'var(--sub)';}
 function focusLogin(){const nk=$id('lgNick');(nk.value.trim()?$id('lgPw'):nk).focus();}
