@@ -164,6 +164,8 @@ td{border-top:1px solid var(--line)}tr:nth-child(even) td{background:#FAFBFC}
     <h2 style="font-size:18px;margin-bottom:2px">덱 DPS 시뮬레이션</h2>
     <div class="sub">칸 순서 = 사용 우선순위 (쓸 수 있는 것 중 앞 칸부터). 전부 쿨이면 평타. 궁극기는 일반 8칸 중 3개 이상인 스타일에서 선택 → 신식은 고른 궁극기 스타일 하나만 열림.<br>
     위 순위표 줄 클릭·아래 카드 클릭 = 앞 빈 칸부터 넣기 · 카드를 칸에 드래그 = 그 칸에 넣기 · 칸끼리 드래그 = 순서 바꾸기 · ✕ = 빼기</div>
+    <div style="position:relative;margin:4px 0 8px"><input id="sSearch" placeholder="🔍 도술 검색 (이름·스타일 일부, 엔터 = 첫 번째 넣기)" autocomplete="off" style="width:100%;max-width:420px;padding:7px 10px">
+      <div id="sRes" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"></div></div>
     <div class="slots" id="slots"></div>
     <div class="ultbar" id="ultBox"></div>
     <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin:6px 0">
@@ -511,6 +513,14 @@ function drawUlt(){ const c={}; cfg.deck.filter(x=>x!=null&&!SK(x).u).forEach(id
 $('ultBox').addEventListener('click',e=>{const b=e.target.closest('[data-ult]'); if(!b) return; const id=+b.dataset.ult;
  const ui=cfg.deck.findIndex(x=>x!=null&&SK(x).u); if(ui>=0) cfg.deck[ui]=id; else { const i=cfg.deck.indexOf(null); if(i<0) return; cfg.deck[i]=id; } deckChanged();});
 
+// 11/23 사용자: 도술 검색 → 클릭/엔터로 덱에 넣기
+function sFind(){const q=$('sSearch').value.replace(/\s+/g,'').toLowerCase();if(!q)return[];const inD=new Set(cfg.deck.filter(x=>x!=null));
+ return D.skills.filter(k=>(k.n+S[k.st]+(k.u?'궁극기':'')).replace(/\s+/g,'').toLowerCase().includes(q)).sort((a,b)=>inD.has(a.id)-inD.has(b.id)).slice(0,12);}
+function drawSRes(){const L=sFind(),inD=new Set(cfg.deck.filter(x=>x!=null));
+ $('sRes').innerHTML=$('sSearch').value.trim()?(L.length?L.map(k=>`<span class="card ${k.u?'ult':''} ${inD.has(k.id)?'in':''}" data-sadd="${k.id}" style="border-color:${COL[k.st]};cursor:pointer" title="${inD.has(k.id)?'이미 덱에 있음':'누르면 덱에 넣기'}">${icon(k)}${k.n}${k.u?' (궁)':''} <span class="tag">${S[k.st]}</span></span>`).join(''):'<span class="tag">찾는 도술 없음</span>'):'';}
+$('sSearch').addEventListener('input',drawSRes);
+$('sSearch').addEventListener('keydown',e=>{if(e.key==='Enter'){const inD=new Set(cfg.deck.filter(x=>x!=null)),k=sFind().find(k=>!inD.has(k.id));if(k){addToDeck(k.id);$('sSearch').value='';drawSRes();}}else if(e.key==='Escape'){$('sSearch').value='';drawSRes();}});
+$('sRes').addEventListener('click',e=>{const c=e.target.closest('[data-sadd]');if(!c)return;addToDeck(+c.dataset.sadd);drawSRes();});
 $('pal').addEventListener('click',e=>{const c=e.target.closest('[data-card]');if(!c)return;addToDeck(+c.dataset.card);});
 $('slots').addEventListener('mousedown',e=>{const x=e.target.closest('[data-x]');if(!x)return;e.preventDefault();e.stopPropagation();cfg.deck[+x.dataset.x]=null;deckChanged();});
 document.addEventListener('dragstart',e=>{const c=e.target.closest&&e.target.closest('[data-card],[data-slot]');if(!c)return;
