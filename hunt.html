@@ -290,7 +290,7 @@ function renderRecs(){
   $('recs').querySelectorAll('.rzn').forEach(e=>{e.value=(Z[RECS[e.dataset.j].z]||Z[0]).z;e.onchange=()=>{const o=Z[RECS[e.dataset.j].z]||{};let i=Z.findIndex(z=>z.z===e.value&&z.lv===o.lv);if(i<0)i=Z.findIndex(z=>z.z===e.value);RECS[e.dataset.j].z=i;renderRecs()}});
   $('recs').querySelectorAll('.rz').forEach(e=>{e.value=RECS[e.dataset.j].z;e.onchange=()=>{RECS[e.dataset.j].z=+e.value;renderRecs()}});
   $('recs').querySelectorAll('.rk').forEach(e=>e.oninput=()=>{RECS[e.dataset.j].k=+e.value||0;sv('recs',RECS);renderCmp()});guardSel($('recs'));
-  $('recs').querySelectorAll('.rget').forEach(e=>e.onchange=()=>{const m=MYL[+e.value];if(!m)return;const zi=Z.findIndex(z=>key(z)===m.key);if(zi<0)return;RECS[+e.dataset.j]={z:zi,k:m.k};renderRecs();render()});
+  $('recs').querySelectorAll('.rget').forEach(e=>e.onchange=()=>{const m=ld('myspots',[])[+e.value];if(!m)return;const zi=Z.findIndex(z=>key(z)===m.key);if(zi<0)return;RECS[+e.dataset.j]={z:zi,k:m.k};renderRecs();render()});
   $('recs').querySelectorAll('.rs').forEach(e=>e.onclick=()=>saveRec(+e.dataset.j,e));
   $('recs').querySelectorAll('.rx').forEach(e=>e.onclick=()=>{RECS.splice(+e.dataset.j,1);renderRecs()});
   renderCmp();
@@ -338,6 +338,7 @@ function drawTabs(){const t=$('mytabs');if(!t)return;const ck=Z[+$('cur').value]
   t.innerHTML=MY.length?MY.map((m,i)=>`<div class="ftab ${m.key===ck?'on':''}" data-myi="${i}" title="${m.key} · 분당 ${m.k}마리 — 누르면 이 사냥터로 + 정보 펼치기">${i===MYOPEN?'📂':'📁'} ${m.key}<small>${m.k}</small></div>`).join('')
    :'<div class="empty">📁 사냥터를 등록하면 여기 탭으로 생겨요</div>';}
 function renderMy(){sv('myspots',MY);drawTabs();
+  document.querySelectorAll('#recs .rget').forEach(e=>{e.innerHTML='<option value="">📁 사냥터 가져오기</option>'+MY.map((m,i)=>`<option value="${i}">${m.key} · 분당 ${m.k}</option>`).join('')});
   $('myspots').innerHTML=MY.length&&MY[MYOPEN]?MY.map((m,i)=>{if(i!==MYOPEN)return '';const zi=zIdx(m.key),z=Z[zi];const pw=z?z.pw:m.pw;
     const its=z?MY_IT.map(([k,n,d])=>{const v=amt(z,k)*m.k*60;return v>0?`<span style="display:inline-block;margin:2px 10px 0 0">${n} <b>${fq(v,d)}</b></span>`:''}).join(''):'<small>사냥터 정보 없음</small>';
     return `<div class="myit" data-myi="${i}" title="누르면 「지금 사냥」에 넣기" style="cursor:pointer;padding:7px 9px;border:1px solid var(--line);border-radius:8px;margin:5px 0;background:#FAFBFC">
