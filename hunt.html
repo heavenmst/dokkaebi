@@ -104,6 +104,15 @@ details.allx>summary{cursor:pointer;font-size:16px;font-weight:800;padding:2px 0
 details.how{margin-top:6px}
 .cmpv b{font-size:13.5px}.cmpv small{display:inline;margin-left:8px;font-size:11px}
 #cmp table,#cmpt{max-width:1500px}
+/* 11/26 사용자: 비교표 높이 줄이기 — 한 화면에 만귀령패 어려움까지 (데스크톱만) */
+@media(min-width:761px){
+#cmp td,#cmp th{padding:1px 7px;line-height:1.2}
+#cmp td[colspan]{padding:3px 8px 1px!important;font-size:12.5px}
+#cmp .cmpv>span[style*="display:block"],#cmp .cmpv small[style*="display:block"]{display:inline!important;margin-left:6px}
+#cmp .cmpv small{margin-left:6px}
+#cmp .chip{padding:0 5px;font-size:11px}
+#cmp td.l img,#cmp td.l .ico{width:16px;height:16px}
+}
 
 /* ── 모바일 (11/23) — 데스크톱은 그대로, 760px 이하만 1단 ── */
 @media(max-width:760px){
